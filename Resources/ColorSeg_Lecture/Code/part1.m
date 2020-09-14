@@ -8,8 +8,8 @@ close all
 
 % Reading the image:
 I = imread('TestImgResized.jpg');
-subplot(3,3,1), imshow(I);
-title('Input Image');
+% subplot(3,3,1), imshow(I);
+% title('Input Image');
 
 % Converting RGB to Gray:
 gr = rgb2gray(I);
@@ -57,8 +57,8 @@ end
 
 %Image after Gaussian blur
 g_image = uint8(g_image);
-% figure,imshow(g_image);
-% title('Gaussian Filtered Image');
+figure,imshow(g_image);
+title('Gaussian Filtered Image');
 
 %% 1.2.2: Find Total number of Colored Objects:
 

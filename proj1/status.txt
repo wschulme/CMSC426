@@ -1,3 +1,0 @@
-This will get taken out by the time we're ready to submit, but it's here now!
-
-Just needed to have something in proj1. Use this for whatever!
