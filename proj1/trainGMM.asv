@@ -1,0 +1,4 @@
+function trainGMM(K)
+    e = 0; % convergence criteria
+    % Initialize Model; scaling factor, gaussian
+end
