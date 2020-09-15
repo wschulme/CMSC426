@@ -6,6 +6,7 @@ close all
 % SGTrain('train_basic_image');
 
 %% Predict
+% Grab basic image
 selector = strcat('train_basic_image', '/*.jpg');
 path = dir(selector);
 imgN = length(path);
@@ -18,12 +19,14 @@ for i = 1:imgN
     imshow(I);
 end
 
+% Separate RGB Channels
 I = medfilt3(I);
 
-r = I(:,:,1);   %% Red Channel
-g = I(:,:,2);   %% Green Channel
-b = I(:,:,3);   %% Blue Channel
+r = I(:,:,1);
+g = I(:,:,2);
+b = I(:,:,3);
 
+% Mask
 Oranges = r > 80 & r < 255 & g > 0 & g < 70 & b > 0 & b < 120;
 Oranges = bwmorph(Oranges, 'dilate');
 imshow(Oranges),title('Single Gaussian');
