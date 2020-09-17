@@ -6,7 +6,7 @@ close all
 % SGTrain('train_basic_image');
 
 %% Predict
-% Grab basic image
+% Grab basic image folder
 selector = strcat('train_basic_image', '/*.jpg');
 path = dir(selector);
 imgN = length(path);
@@ -19,6 +19,11 @@ for i = 1:imgN
     imshow(I);
 end
 
+% Get Dims
+sz = size(I);
+height = I(1);
+width = I(2);
+
 % Separate RGB Channels
 I = medfilt3(I);
 
@@ -26,11 +31,10 @@ r = I(:,:,1);
 g = I(:,:,2);
 b = I(:,:,3);
 
-% Mask
-% This example is only for color Red.
-Oranges = r > 80 & r < 255 & g > 0 & g < 70 & b > 0 & b < 120;
-Oranges = bwmorph(Oranges, 'dilate');
-figure();
-imshow(Oranges),title('Single Gaussian');
+% Get Mask
+BW = roipoly(I);
+rgbMat = [r(BW) g(BW) b(BW)]
+
+% Get Mean, Covariance, Probability
 
 %% Other Shit, Presumably
