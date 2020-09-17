@@ -1,4 +1,4 @@
-function SGTrain(folder)
+function SGTrain(folder) 
 
     % Constants
     
