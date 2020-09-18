@@ -24,17 +24,18 @@ sz = size(I);
 height = I(1);
 width = I(2);
 
-% Separate RGB Channels
-I = medfilt3(I);
-
+% Get Mask
+BW = roipoly(I);
 r = I(:,:,1);
 g = I(:,:,2);
 b = I(:,:,3);
-
-% Get Mask
-BW = roipoly(I);
-rgbMat = [r(BW) g(BW) b(BW)]
-
+BWmat = [r g b]; % Need help getting rgb matrix from BW :)
+x = [206 264 262 202];
+y = [324 324 388 387];
+BW = roipoly(I,x,y);
+imshow(BW)
 % Get Mean, Covariance, Probability
-
+ballmean = mean(BWmat);
+%ballcov =
+%ballprob =
 %% Other Shit, Presumably
