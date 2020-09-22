@@ -64,7 +64,6 @@ if(TRAIN)
 
     %% Calculate Mean and Covariance
 
-    % mu = [r, g, b]
     mu = double(zeros(3,1));
 
     for i=1:nO
@@ -118,7 +117,8 @@ for i = 1:imgN
         
         for x=1:width
             for y=1:height
-                l = likelihood(double(I(x,y,:)),sigma, mu, height*width);
+                ex = [double(I(x,y,1)); double(I(x,y,2)); double(I(x,y,3))];
+                l = likelihood(ex,sigma, mu, height*width);
                 p = prob(l,prior);
                 if p >= threshold
                     prediction(x,y) = 1;
@@ -139,8 +139,10 @@ function p = prob(likelihood, prior)
 end
 
 function l = likelihood(x,sigma,mu,N)
-    %TODO fix this weird transpose bug
-    a = 1/(sqrt((2*pi)^N)*det(sigma));
-    b = exp(-.5*(x-mu).'*inv(sigma)*(x-mu));
-    l = a*b;
+    %x
+    %mu
+    l = exp(-.5*(x-mu)'*(sigma\(x-mu))) / (sqrt((2*pi)^N)*det(sigma));
+    %a = 1/(sqrt((2*pi)^N)*det(sigma));
+    %b = exp(-.5*(x-mu)'*(sigma\(x-mu)));
+    %l = a*b;
 end
