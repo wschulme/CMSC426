@@ -10,7 +10,7 @@ TRAIN = false;
 %% Initialize
 
 %Note, this folder can be made into more images. This file is scalable.
-selector = strcat('train_basic_image', '/*.jpg');
+selector = strcat('train_subset', '/*.jpg');
 path = dir(selector);
 imgN = length(path);
 saveFileName = 'singleGaussModel.mat';
@@ -95,5 +95,52 @@ else
 end 
 
 %% TODO: Predict! Literally just plug it in
+%TODO: find a good threshold and prior. Can default prior to .5
+threshold = .001;
+prior = .25;
 
-%Bayes Rule etc etc
+selector = strcat('test_subset', '/*.jpg');
+path = dir(selector);
+imgN = length(path);
+
+for i = 1:imgN
+        disp(path)
+        imgPath = fullfile(path(i).folder, path(i).name);
+        I = imread(imgPath);
+        imshow(I);
+        
+        % Get Dims
+        sz = size(I);
+        height = sz(2);
+        width = sz(1);
+        
+        prediction = uint8(zeros(width,height));
+        
+        for x=1:width
+            for y=1:height
+                l = likelihood(double(I(x,y,:)),sigma, mu, height*width);
+                p = prob(l,prior);
+                if p >= threshold
+                    prediction(x,y) = 1;
+                end
+            end
+        end
+        
+        imshow(prediction);
+end
+
+%% Helpers
+
+%Bayes Rule
+function p = prob(likelihood, prior)
+    top = likelihood * prior;
+    bottom = likelihood * prior + likelihood * (1-prior);
+    p = top/bottom;
+end
+
+function l = likelihood(x,sigma,mu,N)
+    %TODO fix this weird transpose bug
+    a = 1/(sqrt((2*pi)^N)*det(sigma));
+    b = exp(-.5*(x-mu).'*inv(sigma)*(x-mu));
+    l = a*b;
+end
