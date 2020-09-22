@@ -10,15 +10,16 @@ TRAIN = false;
 %% Initialize
 
 %Note, this folder can be made into more images. This file is scalable.
-selector = strcat('train_subset', '/*.jpg');
+selector = strcat('train_images', '/*.jpg');
 path = dir(selector);
 imgN = length(path);
 saveFileName = 'singleGaussModel.mat';
 
 %% Grab All Orange Pixels from Training Data
-
+orange = [];
 if(TRAIN)
-    orange = [];
+    %orange = [];
+    % For each image
     for i = 1:imgN
         disp(path)
         imgPath = fullfile(path(i).folder, path(i).name);
@@ -27,8 +28,8 @@ if(TRAIN)
 
         % Get Dims
         sz = size(I);
-        height = sz(2);
         width = sz(1);
+        height = sz(2);
 
         % Get Mask
         BW = uint8(roipoly(I));
@@ -56,7 +57,7 @@ if(TRAIN)
                     %Add to list of "oranges" pixels
                     orange = [orange reshape(maskedI(x,y,:),3,1)];
                     %Increment how many "orange" pixels counted
-                    nO = nO+1
+                    nO = nO+1;
                 end
             end
         end
@@ -71,8 +72,8 @@ if(TRAIN)
     end
 
     mu = mu/nO;
-    disp("Empirical Mean");
-    disp(mu);
+    disp("Empirical Mean")
+    disp(mu)
 
     sigma = double(zeros(3,3));
 
@@ -80,7 +81,7 @@ if(TRAIN)
        a = orange(:,i)-mu;
        sigma = sigma + (a * a');
     end
-
+    
     sigma = sigma/nO;
     disp("Empirical Covariance");
     disp(sigma);
@@ -91,12 +92,14 @@ if(TRAIN)
     save(saveFileName, 'mu', 'sigma');
 else
     load(saveFileName, 'mu', 'sigma');
-end 
+    disp(mu)
+    disp(sigma)
+end % END IF STATEMENT
 
 %% TODO: Predict! Literally just plug it in
 %TODO: find a good threshold and prior. Can default prior to .5
 threshold = .001;
-prior = .25;
+prior = .5;
 
 selector = strcat('test_subset', '/*.jpg');
 path = dir(selector);
@@ -118,28 +121,31 @@ for i = 1:imgN
         for x=1:width
             for y=1:height
                 ex = [double(I(x,y,1)); double(I(x,y,2)); double(I(x,y,3))];
-                l = likelihood(ex,sigma, mu, height*width);
+                l = likelihood(ex, sigma, mu, 3);
                 p = prob(l,prior);
                 if p >= threshold
                     prediction(x,y) = 1;
                 end
             end
         end
-        
+        disp("LIKELIHOOD")
+        disp(l)
+        disp("BAYES")
+        disp(p)
         imshow(prediction);
 end
 
 %% Helpers
 
-%Bayes Rule
+%Bayes Rule (aka Posterior)
 function p = prob(likelihood, prior)
     top = likelihood * prior;
-    bottom = likelihood * prior + likelihood * (1-prior);
-    p = top/bottom;
+    bottom = (likelihood * prior) + (likelihood * (1-prior));
+    p = top / bottom;
 end
 
 function l = likelihood(x,sigma,mu,N)
-    a = 1/(sqrt((2*pi)^N)*det(sigma));
+    a = 1/(sqrt((2*pi)^N*det(sigma)));
     b = exp(-.5*(x-mu)'*(sigma\(x-mu)));
     l = a*b;
 end
