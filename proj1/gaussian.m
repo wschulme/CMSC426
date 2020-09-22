@@ -139,10 +139,7 @@ function p = prob(likelihood, prior)
 end
 
 function l = likelihood(x,sigma,mu,N)
-    %x
-    %mu
-    l = exp(-.5*(x-mu)'*(sigma\(x-mu))) / (sqrt((2*pi)^N)*det(sigma));
-    %a = 1/(sqrt((2*pi)^N)*det(sigma));
-    %b = exp(-.5*(x-mu)'*(sigma\(x-mu)));
-    %l = a*b;
+    a = 1/(sqrt((2*pi)^N)*det(sigma));
+    b = exp(-.5*(x-mu)'*(sigma\(x-mu)));
+    l = a*b;
 end
