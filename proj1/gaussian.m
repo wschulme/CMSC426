@@ -98,7 +98,7 @@ end % END IF STATEMENT
 
 %% TODO: Predict! Literally just plug it in
 %TODO: find a good threshold and prior. Can default prior to .5
-threshold = .001;
+threshold = 5e-8;
 prior = .5;
 
 selector = strcat('test_subset', '/*.jpg');
@@ -132,16 +132,17 @@ for i = 1:imgN
         disp(l)
         disp("BAYES")
         disp(p)
-        imshow(prediction);
+        imshow(prediction,[]);
 end
 
 %% Helpers
 
 %Bayes Rule (aka Posterior)
 function p = prob(likelihood, prior)
-    top = likelihood * prior;
-    bottom = (likelihood * prior) + (likelihood * (1-prior));
-    p = top / bottom;
+    %top = likelihood * prior;
+    %bottom = (likelihood * prior) + (likelihood * (1-prior));
+    %p = top / bottom;
+    p = likelihood * prior;
 end
 
 function l = likelihood(x,sigma,mu,N)
