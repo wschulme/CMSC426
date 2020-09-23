@@ -16,9 +16,8 @@ imgN = length(path);
 saveFileName = 'singleGaussModel.mat';
 
 %% Grab All Orange Pixels from Training Data
-orange = [];
 if(TRAIN)
-    %orange = [];
+    orange = [];
     % For each image
     for i = 1:imgN
         disp(path)
