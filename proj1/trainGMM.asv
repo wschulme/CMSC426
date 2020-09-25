@@ -1,0 +1,15 @@
+function trainGMM(K)
+    % TODO: determine convergence criteria
+    E = 0; % convergence criteria
+    % Initialize Model; scaling factor, gaussian mean & covariance
+    % TODO: initialize using train
+    load('GMMmodel.mat', 'pie', 'mu', 'sigma'); % I put it as pie since matlab has preexisting pi
+    % TODO: determine max iterations
+    max_iters = 5;
+    while (i <= max_iters) && (abs(mu-prevMu) > E)
+        expectation_step
+        maximization_step
+        i++;
+    end
+    % Save Model
+end
