@@ -105,7 +105,7 @@ selector = strcat('test_subset', '/*.jpg');
 path = dir(selector);
 imgN = length(path);
 
-for i = 1:1
+for i = 1:imgN
         disp("Image")
         disp(i)
         %disp(path)
