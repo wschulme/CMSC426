@@ -111,7 +111,7 @@ function a = activation(l, pie, i, K, ex, sigma, mu)
     for cluster = 1:K
         bottom = bottom + (pie(cluster)*likelihood(ex,sigma(:,:,cluster),mu(:,:,cluster),3));
     end
-    a = top/bottom;
+    a = to
 end
 
 function cc = avgDiff(mu, prevMu)
