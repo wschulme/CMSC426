@@ -75,14 +75,14 @@ function trainGMM(K)
 
                         % We save the numerator of a_ij first so we can
                         % divide later
-                        gaus(x,y,g) = pie*l;
-                        total_gaussian = total_gaussian + pie*l;
+                        gaus(x,y,g) = pie{K}*l;
+                        total_gaussian = total_gaussian + pie{K}*l;
 
                     end
 
                     % We finally divide the pixel's individual gaussian by
                     % the total
-                    a_ij = (x,y,:)./total_gaussian;
+                    a_ij = I(x,y,:)./total_gaussian;
 
                 end
 
