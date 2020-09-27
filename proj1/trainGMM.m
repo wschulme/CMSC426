@@ -79,12 +79,13 @@ function trainGMM(K)
         %% Expectation
             for o = 1:nO
                     ex = [double(orange(1,o)) ; double(orange(2,o)) ; double(orange(3,o))];
-                    %NOTE this reshape is sus
                     l = likelihood(ex,sigma(:,:,i),mu(i,:),3);
                     a = activation(l, pie, i, K, ex, sigma, mu);
+                    alpha(o) = a;
             end 
             iter = iter+1;
         end
+        %% Maximization
     end
 end
 
