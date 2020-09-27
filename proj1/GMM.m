@@ -10,7 +10,7 @@ function [cluster, d] = gmm(training)
         cluster = testGMM(Model, theta);
     end
     d = measureDepth(cluster);
-    plotGMM(model);
+    plotGMM(Model);
     cluster = cluster;
     
 end
