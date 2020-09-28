@@ -35,7 +35,7 @@ function trainGMM(K)
         maskedI(:,:,2) = g .* BW;
         maskedI(:,:,3) = b .* BW;
 
-        imshow(maskedI);
+        %imshow(maskedI);
 
         % Look at every pixel. If it's 1 in the roipoly image, it's orange.
         % Add it to the running list of orange pixels.
@@ -56,69 +56,39 @@ function trainGMM(K)
     max_iters = 5000;
     prior = .5;
     
-    e = 0.00001; % convergence criteria
-    pie = zeros(K);
-    mu = [];  
-    sigma = [];
-
+    e = 0.0001; % convergence criteria
+    pie = rand(K,1);
+    mu = rand(K,3);  
+    sigma = 100*(reshape(repmat(diag(ones(3,1)),1,K),[3, 3, K]));
+    alpha = zeros(K,nO);
+    maxIter = 10;
+    iter = 1;
     
-    % Initialize each gaussian with their own pie,mu,sigma in list form
-    for g = 1:K
-        % For each gaussian, we initially start with a random init of
-        % mu, pie and sigma ie. scaling factor, mean and co-variance
-        pie(g) = rand(1,1); 
-        mu(:,:,g) = (255)*rand(3,1); 
-        sigma(:,:,g) = 1000 + (1000*rand(3,3));
-    end
-    
-    for i = 1:K
-        prevMu = [-999; -999; -999];
-        alpha = zeros(size(orange));
-        iter = 1;
-        while (iter <= max_iters) && (abs(avgDiff(mu(i,:),prevMu)) > e) % these are still wrong
+    while iter < maxIter
         %% Expectation
+        for i = 1:K
             for o = 1:nO
-                    ex = [double(orange(1,o)) ; double(orange(2,o)) ; double(orange(3,o))];
-                    l = likelihood(ex,sigma(:,:,i),mu(i,:),3);
-                    a = activation(l, pie, i, K, ex, sigma, mu);
-                    alpha(o) = a;
-            end 
-            
-            prevMu = mu;
-            
-        %% Maximization
-        
-            sumAlpha = 0;
-            for o = 1:nO
-                sumAlpha = sumAlpha + alpha(o);
-            end
+                ex = [orange(1,o) orange(2,o) orange(3,o)];
+                a = pie(i)*mvnpdf(ex, mu(i), sigma(:,:,i));
 
-            % Find mu
-            mu_i = double(zeros(3,1));
-            top = 0;
-            for o = 1:nO
-                top = top + alpha(o)*orange(:,o);
-            end
-            mu_i = top/sumAlpha;
+                sum_a = 0;
+                for cluster = 1:K
+                    sum_a = sum_a + pie(cluster)*mvnpdf(ex, mu(cluster), sigma(:,:,cluster));
+                end
 
-            %%Find sigma
-            sigma_i = double(zeros(3,3));
-            top = 0;
-            for o = 1:nO
-                a = orange(:,o)-mu_i;
-                top = top + alpha(o)*(a*a');
+                alpha(i,o)= a/sum_a;
             end
-            sigma_i = top/sumAlpha;
-
-            %%Find pi
-            pi_i = sumAlpha/nO;
-            disp(mu_i);
-            iter = iter+1;
         end
+
+        %% Maximization 
+        for i=1:K
+            mu(i,:) = sum((alpha(:,i).*orange))/sum(alpha(:,i));
+            disp(mu(i,:));
+        end
+        iter = iter+1;
     end
 end
 
-% Helper Functions
 
 % Bayes Rule (aka Posterior)
 function p = prob(likelihood, prior)
