@@ -82,38 +82,8 @@ function trainGMM(K)
 
         %% Maximization 
         for i=1:K
-            mu(i,:) = sum((alpha(:,i).*orange))/sum(alpha(:,i));
-            disp(mu(i,:));
+            %Stuff
         end
         iter = iter+1;
     end
-end
-
-
-% Bayes Rule (aka Posterior)
-function p = prob(likelihood, prior)
-    %top = likelihood * prior;
-    %bottom = (likelihood * prior) + (likelihood * (1-prior));
-    %p = top / bottom;
-    p = likelihood * prior;
-end
-
-% Calculate Likelihood
-function l = likelihood(x,sigma,mu,N)
-    a = 1/(sqrt((2*pi)^N*det(sigma)));
-    b = exp(-.5*(x-mu)'*(sigma\(x-mu)));
-    l = a*b;
-end
-
-function a = activation(l, pie, i, K, ex, sigma, mu)
-    top = pie(i) * l;
-    bottom = 0;
-    for cluster = 1:K
-        bottom = bottom + (pie(cluster)*likelihood(ex,sigma(:,:,cluster),mu(:,:,cluster),3));
-    end
-    a = top/bottom;
-end
-
-function cc = avgDiff(mu, prevMu)
-    cc = mean(mu-prevMu);
 end
