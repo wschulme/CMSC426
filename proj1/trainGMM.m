@@ -83,7 +83,6 @@ function trainGMM(K)
                  alpha = [alpha a];
             end
                 prevMu = mu;
-            size(alpha)
 
             %% Maximization
 
@@ -99,6 +98,7 @@ function trainGMM(K)
                 top = top + alpha(o)*orange(:,o);
             end
             mu_i = top/sumAlpha;
+            mu(:,:,i) = mu_i;
 
             % Find sigma
             sigma_i = double(zeros(3,3));
@@ -109,10 +109,14 @@ function trainGMM(K)
             end
 
             sigma_i = top/sumAlpha;
+            sigma(:,:,i) = sigma_i;
 
             %%Find pi
             pi_i = sumAlpha/nO;
             iter = iter+1;
+            pie(i) = pi_i;
+            
+            disp(mu)
         end
     end
 end
