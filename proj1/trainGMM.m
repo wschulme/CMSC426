@@ -1,6 +1,6 @@
 function trainGMM(K)
-    clc
-    close all
+    clc;
+    close all;
 
     selector = strcat('train_images', '/*.jpg');
     path = dir(selector);
@@ -55,12 +55,12 @@ function trainGMM(K)
  
     max_iters = 5000;
     prior = .5;
+    K = 3;
     
     e = 0.00001; % convergence criteria
-    pie = zeros(K);
+    pie = zeros(K, 1);
     mu = [];  
     sigma = [];
-
     
     % Initialize each gaussian with their own pie,mu,sigma in list form
     for g = 1:K
@@ -71,50 +71,57 @@ function trainGMM(K)
         sigma(:,:,g) = 1000 + (1000*rand(3,3));
     end
     
-    for i = 1:K
-        prevMu = [-999; -999; -999];
-        alpha = zeros(size(orange));
-        iter = 1;
-        while (iter <= max_iters) && (abs(avgDiff(mu(i,:),prevMu)) > e) % these are still wrong
+    prevMu = [-999; -999; -999];
+    alpha = zeros(size(orange));
+    iter = 1;
+    
+    while (iter <= max_iters) & (abs(avgDiff(mu(i,:),prevMu)) > e) % these are still wrong
+    
         %% Expectation
+        for i = 1:K
             for o = 1:nO
                     ex = [double(orange(1,o)) ; double(orange(2,o)) ; double(orange(3,o))];
                     l = likelihood(ex,sigma(:,:,i),mu(i,:),3);
                     a = activation(l, pie, i, K, ex, sigma, mu);
                     alpha(o) = a;
             end 
-            
+        end
             prevMu = mu;
             
         %% Maximization
         
-            sumAlpha = 0;
+        sumAlpha = 0;
+        for i = 1:K
             for o = 1:nO
                 sumAlpha = sumAlpha + alpha(o);
             end
+        end
 
-            % Find mu
-            mu_i = double(zeros(3,1));
-            top = 0;
+        % Find mu
+        mu_i = double(zeros(3,1));
+        top = 0;
+        for i = 1:K
             for o = 1:nO
                 top = top + alpha(o)*orange(:,o);
             end
-            mu_i = top/sumAlpha;
+        end
+        mu_i = top/sumAlpha;
 
-            %%Find sigma
-            sigma_i = double(zeros(3,3));
-            top = 0;
+        % Find sigma
+        sigma_i = double(zeros(3,3));
+        top = 0;
+        for i = 1:K
             for o = 1:nO
                 a = orange(:,o)-mu_i;
                 top = top + alpha(o)*(a*a');
             end
-            sigma_i = top/sumAlpha;
-
-            %%Find pi
-            pi_i = sumAlpha/nO;
-            disp(mu_i);
-            iter = iter+1;
         end
+        sigma_i = top/sumAlpha;
+
+        %%Find pi
+        pi_i = sumAlpha/nO;
+        disp(mu_i);
+        iter = iter+1;
     end
 end
 
@@ -122,9 +129,6 @@ end
 
 % Bayes Rule (aka Posterior)
 function p = prob(likelihood, prior)
-    %top = likelihood * prior;
-    %bottom = (likelihood * prior) + (likelihood * (1-prior));
-    %p = top / bottom;
     p = likelihood * prior;
 end
 
