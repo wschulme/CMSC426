@@ -53,13 +53,13 @@ function trainGMM(K)
         end
     end
  
-    max_iters = 100;
+    max_iters = 5000;
     prior = .5;
     
-    e = 0.0001; % convergence criteria
+    e = 0.00001; % convergence criteria
     pie = zeros(K);
     mu = [];  
-    sigma = []
+    sigma = [];
 
     
     % Initialize each gaussian with their own pie,mu,sigma in list form
@@ -83,9 +83,38 @@ function trainGMM(K)
                     a = activation(l, pie, i, K, ex, sigma, mu);
                     alpha(o) = a;
             end 
+            
+            prevMu = mu;
+            
+        %% Maximization
+        
+            sumAlpha = 0;
+            for o = 1:nO
+                sumAlpha = sumAlpha + alpha(o);
+            end
+
+            % Find mu
+            mu_i = double(zeros(3,1));
+            top = 0;
+            for o = 1:nO
+                top = top + alpha(o)*orange(:,o);
+            end
+            mu_i = top/sumAlpha;
+
+            %%Find sigma
+            sigma_i = double(zeros(3,3));
+            top = 0;
+            for o = 1:nO
+                a = orange(:,o)-mu_i;
+                top = top + alpha(o)*(a*a');
+            end
+            sigma_i = top/sumAlpha;
+
+            %%Find pi
+            pi_i = sumAlpha/nO;
+            disp(mu_i);
             iter = iter+1;
         end
-        %% Maximization
     end
 end
 

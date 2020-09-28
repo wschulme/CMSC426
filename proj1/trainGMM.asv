@@ -59,7 +59,7 @@ function trainGMM(K)
     e = 0.0001; % convergence criteria
     pie = zeros(K);
     mu = [];  
-    sigma = []
+    sigma = [];
 
     
     % Initialize each gaussian with their own pie,mu,sigma in list form
@@ -79,12 +79,43 @@ function trainGMM(K)
         %% Expectation
             for o = 1:nO
                     ex = [double(orange(1,o)) ; double(orange(2,o)) ; double(orange(3,o))];
-                    %NOTE this reshape is sus
                     l = likelihood(ex,sigma(:,:,i),mu(i,:),3);
                     a = activation(l, pie, i, K, ex, sigma, mu);
+                    alpha(o) = a;
             end 
+            
+            prevMu = mu;
+            
+        %% Maximization
+        
+            sumAlpha = 0;
+            for o = 1:nO
+                sumAlpha = sumAlpha + alpha(o);
+            end
+
+            % Find mu
+            mu_i = double(zeros(3,1));
+            top = 0;
+            for o = 1:nO
+                top = top + alpha(o)*orange(:,o);
+            end
+            mu_i = top/sumAlpha;
+
+            %%Find sigma
+            sigma = double(zeros(3,3));
+            top = 0;
+            for o = 1:nO
+                a = orange(:,o)-mu(:,:,i);
+                top = top + alpha(o)*(a*a');
+            end
+            sigma(:,:,i) = top/sumAlpha;
+
+            %%Find pi
+            pi(i) = sumAlpha/nO;
+            disp(mu(:,:,i);
             iter = iter+1;
         end
+        disp(mu(:,:,i));
     end
 end
 
@@ -111,7 +142,7 @@ function a = activation(l, pie, i, K, ex, sigma, mu)
     for cluster = 1:K
         bottom = bottom + (pie(cluster)*likelihood(ex,sigma(:,:,cluster),mu(:,:,cluster),3));
     end
-    a = to
+    a = top/bottom;
 end
 
 function cc = avgDiff(mu, prevMu)
