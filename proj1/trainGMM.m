@@ -52,8 +52,7 @@ function trainGMM(K)
             end
         end
     end
- 
-    max_iters = 5000;
+    max_iters = 2;
     prior = .5;
     K = 3;
     
@@ -70,58 +69,51 @@ function trainGMM(K)
         mu(:,:,g) = (255)*rand(3,1); 
         sigma(:,:,g) = 1000 + (1000*rand(3,3));
     end
-    
-    prevMu = [-999; -999; -999];
-    alpha = zeros(size(orange));
-    iter = 1;
-    
-    while (iter <= max_iters) & (abs(avgDiff(mu(i,:),prevMu)) > e) % these are still wrong
-    
-        %% Expectation
-        for i = 1:K
-            for o = 1:nO
-                    ex = [double(orange(1,o)) ; double(orange(2,o)) ; double(orange(3,o))];
-                    l = likelihood(ex,sigma(:,:,i),mu(i,:),3);
-                    a = activation(l, pie, i, K, ex, sigma, mu);
-                    alpha(o) = a;
-            end 
-        end
-            prevMu = mu;
-            
-        %% Maximization
-        
-        sumAlpha = 0;
-        for i = 1:K
-            for o = 1:nO
-                sumAlpha = sumAlpha + alpha(o);
-            end
-        end
 
-        % Find mu
-        mu_i = double(zeros(3,1));
-        top = 0;
-        for i = 1:K
+    for i = 1:K
+        prevMu = [-999; -999; -999];
+        iter = 1;
+        while (iter <= max_iters) & (abs(avgDiff(mu(i,:),prevMu)) > e)
+            %% Expectation
+            alpha = [];
+            for o = 1:nO
+                 ex = [double(orange(1,o)) ; double(orange(2,o)) ; double(orange(3,o))];
+                 l = likelihood(ex,sigma(:,:,i),mu(i,:),3);
+                 a = activation(l, pie, i, K, ex, sigma, mu);
+                 alpha = [alpha a];
+            end
+                prevMu = mu;
+            size(alpha)
+
+            %% Maximization
+
+            sumAlpha = 0;
+            for o = 1:nO
+               sumAlpha = sumAlpha + alpha(o);
+            end
+
+            % Find mu
+            mu_i = double(zeros(3,1));
+            top = 0;
             for o = 1:nO
                 top = top + alpha(o)*orange(:,o);
             end
-        end
-        mu_i = top/sumAlpha;
+            mu_i = top/sumAlpha;
 
-        % Find sigma
-        sigma_i = double(zeros(3,3));
-        top = 0;
-        for i = 1:K
+            % Find sigma
+            sigma_i = double(zeros(3,3));
+            top = 0;
             for o = 1:nO
                 a = orange(:,o)-mu_i;
                 top = top + alpha(o)*(a*a');
             end
-        end
-        sigma_i = top/sumAlpha;
 
-        %%Find pi
-        pi_i = sumAlpha/nO;
-        disp(mu_i);
-        iter = iter+1;
+            sigma_i = top/sumAlpha;
+
+            %%Find pi
+            pi_i = sumAlpha/nO;
+            iter = iter+1;
+        end
     end
 end
 
