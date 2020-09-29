@@ -1,8 +1,5 @@
-1. GMMpredict
-2. plotGMM
-3. Change each train to train on ALL of the training images (refactoring those folders)
-4. Predict on test images
-    a. Changing the folder in gaussian.m and whatever it is in GMMpredict
-5. Report
-6. Distance?
-7. Export and submit
+1. plotGMM
+2. Train GMM
+3. Report
+4. Distance?
+5. Export and submit
