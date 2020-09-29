@@ -53,6 +53,7 @@ function trainGMM(K)
         end
     end
     
+    K = 3;
     e = 0.0001; % convergence criteria
     pie = rand(K,1);
     mu = rand(K,3);  
@@ -62,10 +63,12 @@ function trainGMM(K)
         sigma(i,:,:) = m*m.';
     end
     alpha = zeros(K,nO);
-    maxIter = 10;
+    maxIter = 1000;
     iter = 1;
+    prevMu = zeros(K,3)
     
-    while iter < maxIter
+    while iter < maxIter & abs(mu - prevMu) > e
+        prevMu = mu;
         %% Expectation
         for o = 1:nO
             for i = 1:K
@@ -108,8 +111,9 @@ function trainGMM(K)
             sigma(i,:,:) = sum_sig/temp(i);
         end
         pie(i) = temp(i)/nO;
-        disp(mu);
+        mu
         
         iter = iter+1;
+        sigma
     end
 end
