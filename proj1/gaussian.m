@@ -37,15 +37,14 @@ if(TRAIN)
         r = I(:,:,1);
         g = I(:,:,2);
         b = I(:,:,3);
-
-        %Lowkey you don't NEED this masked image but it is good for
-        %visualization. Just applying the mask to the image.
+        
+        % Masked image for visualization purposes
         maskedI = uint8(zeros(size(I))); 
         maskedI(:,:,1) = r .* BW;
         maskedI(:,:,2) = g .* BW;
         maskedI(:,:,3) = b .* BW;
 
-        imshow(maskedI);
+        %imshow(maskedI);
 
         % Look at every pixel. If it's 1 in the roipoly image, it's orange.
         % Add it to the running list of orange pixels.
@@ -77,8 +76,6 @@ if(TRAIN)
 
     sigma = double(zeros(3,3));
     
-    %This is just the formula on the slides, which is different from the
-    %cov() function we used before.
     for i=1:nO
        a = orange(:,i)-mu;
        sigma = sigma + (a * a');
@@ -96,8 +93,7 @@ else
     load(saveFileName, 'mu', 'sigma');
 end % END IF STATEMENT
 
-%% TODO: Predict! Literally just plug it in
-%This value for threshold is literally arbitrary dont worry
+%% Predict
 threshold = .0000004;
 prior = .5;
 
@@ -142,9 +138,6 @@ end
 
 %Bayes Rule (aka Posterior)
 function p = prob(likelihood, prior)
-    %top = likelihood * prior;
-    %bottom = (likelihood * prior) + (likelihood * (1-prior));
-    %p = top / bottom;
     p = likelihood * prior;
 end
 

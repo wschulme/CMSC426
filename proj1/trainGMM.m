@@ -28,8 +28,7 @@ function trainGMM(K)
         g = I(:,:,2);
         b = I(:,:,3);
 
-        %Lowkey you don't NEED this masked image but it is good for
-        %visualization. Just applying the mask to the image.
+        % Masked image for visualization purposes
         maskedI = uint8(zeros(size(I))); 
         maskedI(:,:,1) = r .* BW;
         maskedI(:,:,2) = g .* BW;
