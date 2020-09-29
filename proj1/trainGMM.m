@@ -55,42 +55,38 @@ function trainGMM(K)
     
    orange = orange.';
    
-   m = size(orange,2);
-   
-   idx = randperm(m);
+   idx = randperm(nO);
    mu = orange(idx(1:K),:);
    
-   sigma = []
+   sigma = [];
    for j=1:K
        sigma{j} = cov(orange);
    end
    
    pie = ones(1,K) * (1/K);
-   W = zeros(m,K);
    
    maxIter = 1000;
-   for (iter = 1:maxIter)
+   for iter = 1:maxIter
        %E
-       A = zeros(m,K);
+       A = zeros(nO,K);
        for j = 1:K
-           A(:,j) = likelihood(orange, mu(j,:), sigma{j});
+           A(:,j) = pie(j)*likelihood(orange, mu(j,:), sigma{j});
        end
-       A_w = bsxfun(@times, A, pie);
-       W = bsxfun(@rdivide, A_w, sum(A_w,2));
+       A = bsxfun(@rdivide, A, sum(A,2));
        
        %M
        prevMu = mu;
        for j = 1:K
-           pie(j) = mean(W(:,j),1);
-           mu(j,:) = weightedAverage(W(:, j), orange);
+           pie(j) = mean(A(:,j),1);
+           mu(j,:) = (A(:, j)' * orange)./sum(A(:,j),1);
            
            sigma_k = zeros(3, 3);
-           Xm = bsxfun(@minus, orange, mu(j, :));
+           inside = bsxfun(@minus, orange, mu(j, :));
            
-           for i = 1 : m
-                sigma_k = sigma_k + (W(i, j) .* (Xm(i, :)' * Xm(i, :)));
+           for i = 1 : nO
+                sigma_k = sigma_k + (A(i, j) .* (inside(i, :)' * inside(i, :)));
            end
-           sigma{j} = sigma_k ./ sum(W(:, j));
+           sigma{j} = sigma_k ./ sum(A(:, j));
        end
        if (mu == prevMu)
         break
@@ -99,12 +95,7 @@ function trainGMM(K)
    disp(mu);
 end
 
-function [ pdf ] = likelihood(X, mu, Sigma)
+function pdf = likelihood(X, mu, Sigma)
     meanDiff = bsxfun(@minus, X, mu);
     pdf = 1 / sqrt((2*pi)^3 * det(Sigma)) * exp(-1/2 * sum((meanDiff * inv(Sigma) .* meanDiff), 2));
-end
-
-function [ val ] = weightedAverage(weights, values)
-    val = weights' * values;
-    val = val ./ sum(weights, 1);   
 end
