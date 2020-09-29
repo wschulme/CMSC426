@@ -97,7 +97,7 @@ end % END IF STATEMENT
 threshold = .0000004;
 prior = .5;
 
-selector = strcat('test_subset', '/*.jpg');
+selector = strcat('test_images', '/*.jpg');
 path = dir(selector);
 imgN = length(path);
 
