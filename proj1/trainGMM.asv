@@ -28,7 +28,8 @@ function trainGMM(K)
         g = I(:,:,2);
         b = I(:,:,3);
 
-        % Masked image for visualization purposes
+        %Lowkey you don't NEED this masked image but it is good for
+        %visualization. Just applying the mask to the image.
         maskedI = uint8(zeros(size(I))); 
         maskedI(:,:,1) = r .* BW;
         maskedI(:,:,2) = g .* BW;
@@ -51,49 +52,7 @@ function trainGMM(K)
             end
         end
     end
-    
-   orange = orange.';
-   
-   %% Constants
-   maxIter = 1000;
-   e = .0000001;
-   
-   %% Random Init
-   mu = rand(K,3);
-   
-   sigma = [];
-   for j=1:K
-       sigma{j} = cov(orange);
-   end
-   
-   pie = rand(1,K);
-   
-   for iter = 1:maxIter
-       %% Expectation
-       A = zeros(nO,K);
-       for j = 1:K
-           A(:,j) = pie(j)*mvnpdf(orange, mu(j,:), sigma{j});
-       end
-       A = A./sum(A,2);
-       
-       %% Maximization
-       prevMu = mu;
-       for j = 1:K
-           pie(j) = mean(A(:,j),1);
-           mu(j,:) = (A(:, j)' * orange)./sum(A(:,j),1);
-           
-           sigma_k = zeros(3, 3);
-           
-           inside = orange - mu(j, :);
-           for i = 1 : nO
-                sigma_k = sigma_k + (A(i, j) .* (inside(i, :)' * inside(i, :)));
-           end
-           sigma{j} = sigma_k ./ sum(A(:, j));
-       end
-       if (abs(sum(mu - prevMu)) <= e)
-        break
-       end
-   end
-   %disp(mu);
-   save(saveFileName, 'mu', 'sigma', 'pie');
+ 
+   m = fitgmdist(orange,3);
+   m
 end
