@@ -52,13 +52,15 @@ function trainGMM(K)
             end
         end
     end
- 
-    K = 3;
     
     e = 0.0001; % convergence criteria
     pie = rand(K,1);
     mu = rand(K,3);  
-    sigma = 100*(reshape(repmat(diag(ones(3,1)),1,K),[3, 3, K]));
+    sigma = zeros(K,3,3);
+    for i=1:K
+        m = 100*rand(3);
+        sigma(i,:,:) = m*m.';
+    end
     alpha = zeros(K,nO);
     maxIter = 10;
     iter = 1;
@@ -67,12 +69,17 @@ function trainGMM(K)
         %% Expectation
         for o = 1:nO
             for i = 1:K
+                % Lmfao why in the fuck does this fix it????
+                s = [sigma(i,:,1);sigma(i,:,2);sigma(i,:,3);];
+                
                 ex = [orange(1,o) orange(2,o) orange(3,o)];
-                a = pie(i)*mvnpdf(ex, mu(i), sigma(:,:,i));
-
+                a = pie(i)*mvnpdf(ex, mu(i,:), s);
+                
                 sum_a = 0;
                 for cluster = 1:K
-                    sum_a = sum_a + pie(cluster)*mvnpdf(ex, mu(cluster), sigma(:,:,cluster));
+                    % More voodoo
+                    s_c = [sigma(cluster,:,1);sigma(cluster,:,2);sigma(cluster,:,3);];
+                    sum_a = sum_a + pie(cluster)*mvnpdf(ex, mu(cluster,:), s_c);
                 end
 
                 alpha(i,o)= a/sum_a;
@@ -89,17 +96,19 @@ function trainGMM(K)
             for o = 1:nO
                 sum_mu = sum_mu + (alpha(i,o)*orange(:,o));
             end
-            mu(:,i) = sum_mu/temp(i);
+            mu(i,:) = sum_mu/temp(i);
         end
         
         % Calculate sigma
         for i=1:K
             sum_sig = 0;
             for o = 1:nO
-                sum_sig = sum_sig + alpha(i,o)*(orange(:,o)-mu(:,i))*(orange(:,o)-mu(:,i))';
+                sum_sig = sum_sig + alpha(i,o)*(orange(:,o)-mu(i,:))*(orange(:,o)-mu(i,:))';
             end
-            sigma(:,:,i) = sum_sig/temp(i);
+            sigma(i,:,:) = sum_sig/temp(i);
         end
+        pie(i) = temp(i)/nO;
+        disp(mu);
         
         iter = iter+1;
     end
