@@ -60,6 +60,7 @@ function trainGMM(K)
    
    %% Random Init
    mu = rand(K,3);
+   prevMu = zeros(size(mu));
    
    sigma = [];
    for j=1:K
@@ -67,8 +68,9 @@ function trainGMM(K)
    end
    
    pie = rand(1,K);
+   iter = 1;
    
-   for iter = 1:maxIter
+   while iter < maxIter & abs(sum(mu - prevMu)) > e
        %% Expectation
        A = zeros(nO,K);
        for j = 1:K
@@ -90,10 +92,8 @@ function trainGMM(K)
            end
            sigma{j} = sigma_k ./ sum(A(:, j));
        end
-       if (abs(sum(mu - prevMu)) <= e)
-        break
-       end
+        iter = iter + 1;
    end
-   %disp(mu);
+   disp(mu);
    save(saveFileName, 'mu', 'sigma', 'pie');
 end
