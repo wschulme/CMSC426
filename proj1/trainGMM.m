@@ -77,8 +77,6 @@ function trainGMM(K)
            for o = 1:nO
                A(o,j) = pie(j)*mvnpdf(orange(o,:), mu(j,:), sigma{j});
            end
-           %disp(size(pie(j)*mvnpdf(orange, mu(j,:), sigma{j})));
-           %A(:,j) = pie(j)*mvnpdf(orange, mu(j,:), sigma{j});
        end
        A = A./sum(A,2);
        
@@ -102,6 +100,5 @@ function trainGMM(K)
        end
         iter = iter + 1;
    end
-   disp(mu);
    save(saveFileName, 'mu', 'sigma', 'pie' , 'K');
 end
