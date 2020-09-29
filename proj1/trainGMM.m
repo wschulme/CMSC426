@@ -70,9 +70,9 @@ function trainGMM(K)
        %E
        A = zeros(nO,K);
        for j = 1:K
-           A(:,j) = pie(j)*likelihood(orange, mu(j,:), sigma{j});
+           A(:,j) = pie(j)*mvnpdf(orange, mu(j,:), sigma{j});
        end
-       A = bsxfun(@rdivide, A, sum(A,2));
+       A = A./sum(A,2);
        
        %M
        prevMu = mu;
@@ -81,8 +81,8 @@ function trainGMM(K)
            mu(j,:) = (A(:, j)' * orange)./sum(A(:,j),1);
            
            sigma_k = zeros(3, 3);
-           inside = bsxfun(@minus, orange, mu(j, :));
            
+           inside = orange - mu(j, :);
            for i = 1 : nO
                 sigma_k = sigma_k + (A(i, j) .* (inside(i, :)' * inside(i, :)));
            end
@@ -93,9 +93,5 @@ function trainGMM(K)
        end
    end
    disp(mu);
-end
-
-function pdf = likelihood(X, mu, Sigma)
-    meanDiff = bsxfun(@minus, X, mu);
-    pdf = 1 / sqrt((2*pi)^3 * det(Sigma)) * exp(-1/2 * sum((meanDiff * inv(Sigma) .* meanDiff), 2));
+   save(saveFileName, 'mu', 'sigma', 'pie');
 end
