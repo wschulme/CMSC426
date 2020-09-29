@@ -9,7 +9,7 @@ function trainGMM(K)
     
     orange = [];
     % For each image
-    for i = 1:1
+    for i = 1:2
         disp(path)
         imgPath = fullfile(path(i).folder, path(i).name);
         I = imread(imgPath);
@@ -74,7 +74,11 @@ function trainGMM(K)
        %% Expectation
        A = zeros(nO,K);
        for j = 1:K
-           A(:,j) = pie(j)*mvnpdf(orange, mu(j,:), sigma{j});
+           for o = 1:nO
+               A(o,j) = pie(j)*mvnpdf(orange(o,:), mu(j,:), sigma{j});
+           end
+           %disp(size(pie(j)*mvnpdf(orange, mu(j,:), sigma{j})));
+           %A(:,j) = pie(j)*mvnpdf(orange, mu(j,:), sigma{j});
        end
        A = A./sum(A,2);
        
@@ -82,7 +86,11 @@ function trainGMM(K)
        prevMu = mu;
        for j = 1:K
            pie(j) = mean(A(:,j),1);
-           mu(j,:) = (A(:, j)' * orange)./sum(A(:,j),1);
+           
+           for o = 1 : nO
+               mu(j,:) = mu(j,:) + (A(o, j)' * orange(o,:));
+           end
+           mu(j,:) = mu(j,:)./sum(A(:,j),1);
            
            sigma_k = zeros(3, 3);
            
@@ -94,5 +102,6 @@ function trainGMM(K)
        end
         iter = iter + 1;
    end
-   save(saveFileName, 'mu', 'sigma', 'pie');
+   disp(mu);
+   save(saveFileName, 'mu', 'sigma', 'pie' , 'K');
 end
