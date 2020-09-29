@@ -94,6 +94,5 @@ function trainGMM(K)
        end
         iter = iter + 1;
    end
-   disp(mu);
    save(saveFileName, 'mu', 'sigma', 'pie');
 end
