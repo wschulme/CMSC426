@@ -55,26 +55,29 @@ function trainGMM(K)
     
    orange = orange.';
    
-   idx = randperm(nO);
-   mu = orange(idx(1:K),:);
+   %% Constants
+   maxIter = 1000;
+   e = .0000001;
+   
+   %% Random Init
+   mu = rand(K,3);
    
    sigma = [];
    for j=1:K
        sigma{j} = cov(orange);
    end
    
-   pie = ones(1,K) * (1/K);
+   pie = rand(1,K);
    
-   maxIter = 1000;
    for iter = 1:maxIter
-       %E
+       %% Expectation
        A = zeros(nO,K);
        for j = 1:K
            A(:,j) = pie(j)*mvnpdf(orange, mu(j,:), sigma{j});
        end
        A = A./sum(A,2);
        
-       %M
+       %% Maximization
        prevMu = mu;
        for j = 1:K
            pie(j) = mean(A(:,j),1);
@@ -88,10 +91,10 @@ function trainGMM(K)
            end
            sigma{j} = sigma_k ./ sum(A(:, j));
        end
-       if (mu == prevMu)
+       if (abs(sum(mu - prevMu)) <= e)
         break
        end
    end
-   disp(mu);
+   %disp(mu);
    save(saveFileName, 'mu', 'sigma', 'pie');
 end
