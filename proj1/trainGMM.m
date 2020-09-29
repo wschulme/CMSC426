@@ -53,37 +53,6 @@ function trainGMM(K)
         end
     end
  
-    max_iters = 5000;
-    prior = .5;
-    
-    e = 0.0001; % convergence criteria
-    pie = rand(K,1);
-    mu = rand(K,3);  
-    sigma = 100*(reshape(repmat(diag(ones(3,1)),1,K),[3, 3, K]));
-    alpha = zeros(K,nO);
-    maxIter = 10;
-    iter = 1;
-    
-    while iter < maxIter
-        %% Expectation
-        for i = 1:K
-            for o = 1:nO
-                ex = [orange(1,o) orange(2,o) orange(3,o)];
-                a = pie(i)*mvnpdf(ex, mu(i), sigma(:,:,i));
-
-                sum_a = 0;
-                for cluster = 1:K
-                    sum_a = sum_a + pie(cluster)*mvnpdf(ex, mu(cluster), sigma(:,:,cluster));
-                end
-
-                alpha(i,o)= a/sum_a;
-            end
-        end
-
-        %% Maximization 
-        for i=1:K
-            %Stuff
-        end
-        iter = iter+1;
-    end
+   m = fitgmdist(orange.',3);
+   m
 end
