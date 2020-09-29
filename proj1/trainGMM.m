@@ -52,7 +52,59 @@ function trainGMM(K)
             end
         end
     end
- 
-   m = fitgmdist(orange.',3);
-   m
+    
+   orange = orange.';
+   
+   m = size(orange,2);
+   
+   idx = randperm(m);
+   mu = orange(idx(1:K),:);
+   
+   sigma = []
+   for j=1:K
+       sigma{j} = cov(orange);
+   end
+   
+   pie = ones(1,K) * (1/K);
+   W = zeros(m,K);
+   
+   maxIter = 1000;
+   for (iter = 1:maxIter)
+       %E
+       A = zeros(m,K);
+       for j = 1:K
+           A(:,j) = likelihood(orange, mu(j,:), sigma{j});
+       end
+       A_w = bsxfun(@times, A, pie);
+       W = bsxfun(@rdivide, A_w, sum(A_w,2));
+       
+       %M
+       prevMu = mu;
+       for j = 1:K
+           pie(j) = mean(W(:,j),1);
+           mu(j,:) = weightedAverage(W(:, j), orange);
+           
+           sigma_k = zeros(3, 3);
+           Xm = bsxfun(@minus, orange, mu(j, :));
+           
+           for i = 1 : m
+                sigma_k = sigma_k + (W(i, j) .* (Xm(i, :)' * Xm(i, :)));
+           end
+           sigma{j} = sigma_k ./ sum(W(:, j));
+       end
+       if (mu == prevMu)
+        break
+       end
+   end
+   disp(mu);
+end
+
+function [ pdf ] = likelihood(X, mu, Sigma)
+    meanDiff = bsxfun(@minus, X, mu);
+    pdf = 1 / sqrt((2*pi)^3 * det(Sigma)) * exp(-1/2 * sum((meanDiff * inv(Sigma) .* meanDiff), 2));
+end
+
+function [ val ] = weightedAverage(weights, values)
+    val = weights' * values;
+    val = val ./ sum(weights, 1);   
 end
