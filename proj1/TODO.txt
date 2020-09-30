@@ -1,5 +1,0 @@
-1. plotGMM
-2. Train GMM
-3. Report
-4. Distance?
-5. Export and submit
