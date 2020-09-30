@@ -131,6 +131,7 @@ for i = 1:imgN
                 end
             end
         end
+        figure('Name',strcat('Test Image ',num2str(i)));
         imshow(prediction,[]);
 end
 

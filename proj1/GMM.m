@@ -9,7 +9,6 @@ function [cluster, d] = GMM(training)
         cluster = testGMM(threshold);
         %d = measureDepth(cluster);
     end
-    
     plotGMM();
     
 end

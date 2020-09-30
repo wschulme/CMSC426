@@ -39,6 +39,8 @@ function cluster = testGMM(t)
             end
         end
         cluster{end + 1} = prediction;
-        imshow(prediction,[]);
+        
+        figure('Name',strcat('Test Image ',num2str(img)));
+        imshow(prediction);
     end
 end
