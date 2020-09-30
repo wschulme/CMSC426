@@ -2,7 +2,6 @@ function [cluster, d] = GMM(training)
     threshold = .0000001;
     K = 5;
     cluster = {};
-    training = true;
     if training
         trainGMM(K);
     else
@@ -11,8 +10,6 @@ function [cluster, d] = GMM(training)
         %d = measureDepth(cluster);
     end
     
-    loadFileName = 'GMMmodel.mat';
-    load(loadFileName, 'mu', 'sigma', 'pie' , 'K');
-    plotGMM(mu,sigma,K);
+    plotGMM();
     
 end
