@@ -9,7 +9,7 @@ function trainGMM(K)
     
     orange = [];
     % For each image
-    for i = 1:2
+    for i = 1:imgN
         disp(path)
         imgPath = fullfile(path(i).folder, path(i).name);
         I = imread(imgPath);
