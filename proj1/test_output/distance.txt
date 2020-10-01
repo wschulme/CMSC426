@@ -1,0 +1,16 @@
+Measured Depth:
+    {'Test Image 1 is an estimated 366.3909 units away.'}
+
+    {'Test Image 2 is an estimated 334.3631 units away.'}
+
+    {'Test Image 3 is an estimated 362.3071 units away.'}
+
+    {'Test Image 4 is an estimated 86.6215 units away.'}
+
+    {'Test Image 5 is an estimated 123.2115 units away.'}
+
+    {'Test Image 6 is an estimated 183.2808 units away.'}
+
+    {'Test Image 7 is an estimated 246.3518 units away.'}
+
+    {'Test Image 8 is an estimated 263.2882 units away.'}
