@@ -9,5 +9,9 @@ function plotGMM()
     end
     view(100,36); set(gca,'proj','perspective'); grid on; 
     grid on; axis equal; axis tight;
+    xlabel('R value');
+    ylabel('G value');
+    zlabel('B value');
+    title('GMM Plot');
     hold off;
 end
