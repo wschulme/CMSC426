@@ -1,6 +1,9 @@
 % plot ANMS 
+selector = strcat('./Images/Set1', '/*.jpg');
+path = dir(selector);
+imgN = length(path);
 
-function p = plot_ANMS(I, NStrong)
+function p = plot_corners(I, NStrong)
     points = detectHarrisFeatures(I)
     
     strongest = points.selectStrongest(NStrong);
