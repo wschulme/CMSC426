@@ -19,20 +19,19 @@ function p = ANMS(I, NBest, quality)
     
     sz = size(I);
     count = 0;
-    x = zeros(sz(1)*sz(2), 1);
-    y = zeros(sz(1)*sz(2), 1);
+    x = zeros(n, 6)
 
     for i = 1:sz(1)
         for j = 1:sz(2)
             if(features(i,j) == 1)
-                x(count) = i;
-                y(count) = j;
                 count = count + 1;
+                x
             end
         end
     end
     
     x = x(1:count, :);
+
     y = y(1:count, :);
     
     % Plot features
@@ -49,9 +48,8 @@ function p = ANMS(I, NBest, quality)
      for j = 1:NStrong
         % We check if the metric scores are bigger between the current
         % point and the previous, if it is we then get the distances. We
-        % then iteratively get smaller distances.
-        % Switched from metric(j) > metric(i) for Harris
-        if processed(y(j), x(j)) > processed(y(i), x(i))
+        % then iteratively get smaller distances 
+        if metric(j) > metric(i)
           % Calculate distance
           ED = (y(j) - y(i))^2 + (x(j) - x(i))^2;
           if (ED < radius(i))
