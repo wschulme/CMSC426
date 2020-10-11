@@ -19,4 +19,14 @@ function [pano] = MyPanorama()
         
         p = ANMS(I, N_Best, quality);
     end
+    
+    %% Feature Descriptor
+    
+    %% Feature Matching
+    
+    %% RANSAC step
+    
+    %% Projection (Optional)
+    
+    %% Blending
 end
