@@ -3,13 +3,7 @@
 % features from the corner algo. This allows us to have more points across
 % the image for processing rather than just the locations where there may
 % be more corners.
-function p = ANMS(I, NBest, quality)
-%     % Detecting features by using Harris Algo
-%     features = detectHarrisFeatures(I, 'MinQuality', quality);
-%     % We get the scores from the features
-%     metric = features.Metric;
-%     % We get the x, y coordinates
-%     points = features.Location;
+function p = ANMS(I, NBest)
     
     % Detecting features by using corneremetric Algo
     processed = cornermetric(I);
@@ -27,8 +21,8 @@ function p = ANMS(I, NBest, quality)
     y = zeros(sz(1)*sz(2), 1);
 
     % Going through the array and getting all the coordinates for the 1's
-    for j = 1:sz(2)-1
-        for i = 1:sz(1)-1
+    for j = 1:sz(2)
+        for i = 1:sz(1)
             if(features(i,j) == 1)
                 x(count) = i;
                 y(count) = j;

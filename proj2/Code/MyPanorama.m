@@ -13,27 +13,34 @@ function [pano] = MyPanorama()
     RANSAC_thresh = 2;
     maxIters = 1000;
     
+    %% Variables
+    I1 = getGrayImage(1, path);
+    
     %% Detect Corners and ANMS
     %for img = 1:imgN
     for img = 2:2
-        imgPath = fullfile(path(img).folder, path(img).name);
-        I = rgb2gray(imread(imgPath));
+        I2 = getGrayImage(img, path);
         
-        p = ANMS(I, N_Best);
+        p1 = ANMS(I1, N_Best);
+        p2 = ANMS(I1, N_Best);
+    
+    
+        %% Feature Descriptor
+
+        f1 = features(I1);
+        f2 = features(I2);
+
+        %% Feature Matching
+
+        %% RANSAC step
+
+        %% Projection (Optional)
+
+        %% Blending
+        I1 = blend(I1, I2)
     end
-    
-    %% Feature Descriptor
-    %for img = 1:imgN
-    for img = 2:2
-        imgPath = fullfile(path(img).folder, path(img).name);
-        f = features(imgPath)
-    end
-    
-    %% Feature Matching
-    
-    %% RANSAC step
-    
-    %% Projection (Optional)
-    
-    %% Blending
+end
+
+function img = getGrayImage(i, path)
+    img = rgb2gray(imread(fullfile(path(i).folder, path(i).name)));
 end
