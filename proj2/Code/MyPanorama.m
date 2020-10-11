@@ -23,6 +23,11 @@ function [pano] = MyPanorama()
     end
     
     %% Feature Descriptor
+    %for img = 1:imgN
+    for img = 2:2
+        imgPath = fullfile(path(img).folder, path(img).name);
+        f = features(imgPath)
+    end
     
     %% Feature Matching
     
