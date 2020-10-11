@@ -33,8 +33,8 @@ function p = plot_corners(I, NBest)
 
     for i = 1:NStrong
      for j = 1:NStrong
-        if metric(j) > metric(i)
-          ED = (y(j) - y(i))^2 + (x(j) - x(i))^2;
+        if metric( > C_img(y(i), x(i))
+          ED = (y(j) - y(i))^2 + (x(j) - x(i))^2
           if (ED < radius(i))
             radius(i) = ED;
           end
@@ -42,11 +42,11 @@ function p = plot_corners(I, NBest)
      end
     end
 
-    [RadiusValue, RadiusIdx] = sort(radius, 'descend')
+   [RadiusValue, RadiusIdx] = sort(radius, 'descend')
     x = x(RadiusIdx(1:NBest))
     y = y(RadiusIdx(1:NBest))
-    p = [x, y]
-
+    p = [y,x]
+    
     imshow(I)
     hold on
     plot(p)
