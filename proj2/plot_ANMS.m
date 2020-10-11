@@ -7,16 +7,16 @@ function main()
     for i = 2:2
         imgPath = fullfile(path(i).folder, path(i).name);
         I = rgb2gray(imread(imgPath));
-        plot_corners(I, 50);
+        plot_corners(I, 150);
     end
 end
 
 % plot ANMS 
 function p = plot_corners(I, NBest)
     % default is 0.01
-    quality = 0.0001
+    quality = 0.0001;
     features = detectHarrisFeatures(I, 'MinQuality', quality);
-    metric = features.Metric
+    metric = features.Metric;
     points = features.Location;
     
     x = points(:,1);
@@ -42,13 +42,15 @@ function p = plot_corners(I, NBest)
      end
     end
 
-    [RadiusValue, RadiusIdx] = sort(radius, 'descend')
-    x = x(RadiusIdx(1:NBest))
-    y = y(RadiusIdx(1:NBest))
-    p = [x, y]
+    [val, idx] = sort(radius, 'descend');
 
+    x = x(idx(1:NBest));
+    y = y(idx(1:NBest));
+    
+    p = [x(:), y(:)]
+    
     imshow(I)
     hold on
-    plot(p)
+    plot(p(:,1),p(:,2), 'Color', 'r', 'Marker','x', 'LineStyle','none', 'MarkerSize', 20);
     hold off
 end
