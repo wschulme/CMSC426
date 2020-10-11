@@ -1,20 +1,4 @@
-
-function main()
-    selector = strcat('./Images/Set1', '/*.jpg');
-    path = dir(selector);
-    imgN = length(path);
-    
-    for i = 2:2
-        imgPath = fullfile(path(i).folder, path(i).name);
-        I = rgb2gray(imread(imgPath));
-        plot_corners(I, 150);
-    end
-end
-
-% plot ANMS 
-function p = plot_corners(I, NBest)
-    % default is 0.01
-    quality = 0.0001;
+function p = ANMS(I, NBest, quality)
     features = detectHarrisFeatures(I, 'MinQuality', quality);
     metric = features.Metric;
     points = features.Location;
@@ -42,12 +26,12 @@ function p = plot_corners(I, NBest)
      end
     end
 
-    [val, idx] = sort(radius, 'descend');
+    [~, idx] = sort(radius, 'descend');
 
     x = x(idx(1:NBest));
     y = y(idx(1:NBest));
     
-    p = [x(:), y(:)]
+    p = [x(:), y(:)];
     
     imshow(I)
     hold on
