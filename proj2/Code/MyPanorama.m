@@ -14,15 +14,16 @@ function [pano] = MyPanorama()
     maxIters = 1000;
     
     %% Variables
-    I1 = getGrayImage(1, path);
+    pano = getGrayImage(1, path);
     
     %% Detect Corners and ANMS
     %for img = 1:imgN
     for img = 2:2
+        I1 = pano;
         I2 = getGrayImage(img, path);
         
         p1 = ANMS(I1, N_Best);
-        p2 = ANMS(I1, N_Best);
+        p2 = ANMS(I2, N_Best);
     
     
         %% Feature Descriptor
@@ -37,7 +38,7 @@ function [pano] = MyPanorama()
         %% Projection (Optional)
 
         %% Blending
-        I1 = blend(I1, I2)
+        pano = blend(I1, I2)
     end
 end
 
