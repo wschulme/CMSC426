@@ -18,17 +18,17 @@ function p = ANMS(I, NBest, quality)
     features = imregionalmax(processed);
     
     % Getting size of image
-    sz = size(I);
-    count = 0;
+    sz = size(I)
+    count = 1;
     
     % Making x and y max length possible for the image and then deleting
     % extra later as theres no way of dynamically making arrays larger
     x = zeros(sz(1)*sz(2), 1);
     y = zeros(sz(1)*sz(2), 1);
 
-    % Going through the array and getting all 1's 
-    for i = 1:sz(1)
-        for j = 1:sz(2)
+    % Going through the array and getting all the coordinates for the 1's
+    for j = 1:sz(2)-1
+        for i = 1:sz(1)-1
             if(features(i,j) == 1)
                 x(count) = i;
                 y(count) = j;
@@ -38,9 +38,9 @@ function p = ANMS(I, NBest, quality)
     end
     
     % Deleting extra space
-    x = x(1:count, :);
-    y = y(1:count, :);
-    
+    x = x(1:count-1, :);
+    y = y(1:count-1, :);
+
     % Plot features
     imshow(I)
     hold on
@@ -57,7 +57,10 @@ function p = ANMS(I, NBest, quality)
         % point and the previous, if it is we then get the distances. We
         % then iteratively get smaller distances.
         % Switched from metric(j) > metric(i) for Harris
-        if processed(y(j), x(j)) > processed(y(i), x(i))
+        %j
+        %y(j)
+        
+        if processed(x(j), y(j)) > processed(x(i), y(i))
           % Calculate distance
           ED = (y(j) - y(i))^2 + (x(j) - x(i))^2;
           if (ED < radius(i))
