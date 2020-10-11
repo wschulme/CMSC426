@@ -1,32 +1,22 @@
-% plot ANMS 
-selector = strcat('./Images/Set1', '/*.jpg');
-path = dir(selector);
-imgN = length(path);
 
-function p = plot_corners(I, NStrong)
-    points = detectHarrisFeatures(I)
+function main()
+    selector = strcat('./Images/Set1', '/*.jpg');
+    path = dir(selector);
+    imgN = length(path);
     
-    strongest = points.selectStrongest(NStrong);
-    imshow(I)
-    hold on
-    plot(strongest)
-
-    r = zeros(NStrong)
-    
-    for i = 1:NStrong
-        for j = 1:NStrong
-           if C_img(y(j)), x(j)) > C_img(y(i), x(i))
-             ED = (y(j) - y(i))^2 + (x(j) - x(i))^2
-             if (ED < radius(i))
-               radius(i) = ED;
-             end
-           end
-        end
+    for i = 2:2
+        imgPath = fullfile(path(i).folder, path(i).name);
+        I = rgb2gray(imread(imgPath));
+        plot_corners(I, 50);
     end
-    
-    [RadiusValue, RadiusIdx] = sort(radius, 'descend')
-    x = x(RadiusIdx(1:NBest))
-    y = y(RadiusIdx(1:NBest))
-    p = [y,x]
 end
 
+% plot ANMS 
+function p = plot_corners(I, NStrong)
+    points = cornermetric(I);
+    Irm = imregionalmax(points)
+    plot(I)
+    hold on
+    plot(Irm)
+    hold off
+end
