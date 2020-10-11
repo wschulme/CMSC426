@@ -3,14 +3,8 @@
 % MyPanorama but in here for ease of use. This should get the Feature
 % Descriptor as mentioned in part 3 and be able to generate 40x40 blurred
 % sections.
-function main()
-    selector = strcat('./Images/Set1', '/*.jpg');
-    path = dir(selector);
-    
-    match(path)
-end
 
-function match(path)
+function f = features(path)
     imgN = length(path);
     plots = zeros(2)
     

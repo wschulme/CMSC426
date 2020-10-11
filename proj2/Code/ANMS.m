@@ -17,11 +17,16 @@ function p = ANMS(I, NBest, quality)
     % Gets max of processed matrix
     features = imregionalmax(processed);
     
+    % Getting size of image
     sz = size(I);
     count = 0;
+    
+    % Making x and y max length possible for the image and then deleting
+    % extra later as theres no way of dynamically making arrays larger
     x = zeros(sz(1)*sz(2), 1);
     y = zeros(sz(1)*sz(2), 1);
 
+    % Going through the array and getting all 1's 
     for i = 1:sz(1)
         for j = 1:sz(2)
             if(features(i,j) == 1)
@@ -32,6 +37,7 @@ function p = ANMS(I, NBest, quality)
         end
     end
     
+    % Deleting extra space
     x = x(1:count, :);
     y = y(1:count, :);
     
