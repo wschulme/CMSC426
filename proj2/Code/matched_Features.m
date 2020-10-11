@@ -1,4 +1,8 @@
 % Feature Descriptor
+% Currently a working peice of code. Some of this code is suppose to be in
+% MyPanorama but in here for ease of use. This should get the Feature
+% Descriptor as mentioned in part 3 and be able to generate 40x40 blurred
+% sections.
 function main()
     selector = strcat('./Images/Set1', '/*.jpg');
     path = dir(selector);
@@ -15,6 +19,10 @@ function match(path)
         imgPath = fullfile(path(i).folder, path(i).name);
         I = rgb2gray(imread(imgPath));
         %plot_corners(I, 150);
+        % Generating blurred section using fspecial and then applyin with
+        % imfilter, IDK wtf this doing tho cuz its suppose to be in 40x40
+        % sections, but i think its making a 40x40 area to read blur data
+        % from (vs just applying to a 40x40 area)
         H = fspecial('disk',40);
         blurred = imfilter(I,H,'replicate'); 
         imshow(blurred);
