@@ -8,8 +8,10 @@ function [pano] = MyPanorama()
     imgN = length(path);
     
     %% Constants
-    N_Best = 150;
-    quality = 0.0001;
+    N_Best = 300;
+    match_thresh = .85;
+    RANSAC_thresh = 2;
+    maxIters = 1000;
     
     %% Detect Corners and ANMS
     %for img = 1:imgN
@@ -17,7 +19,7 @@ function [pano] = MyPanorama()
         imgPath = fullfile(path(img).folder, path(img).name);
         I = rgb2gray(imread(imgPath));
         
-        p = ANMS(I, N_Best, quality);
+        p = ANMS(I, N_Best);
     end
     
     %% Feature Descriptor
