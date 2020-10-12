@@ -12,28 +12,20 @@ function p = ANMS(I, NBest)
     features = imregionalmax(processed);
     
     % Getting size of image
-    sz = size(I)
-    count = 1;
+    sz = size(I);
     
-    % Making x and y max length possible for the image and then deleting
-    % extra later as theres no way of dynamically making arrays larger
-    x = zeros(sz(1)*sz(2), 1);
-    y = zeros(sz(1)*sz(2), 1);
+    x = [];
+    y = [];
 
     % Going through the array and getting all the coordinates for the 1's
-    for j = 1:sz(2)
-        for i = 1:sz(1)
+    for i = 1:sz(1)
+        for j = 1:sz(2)
             if(features(i,j) == 1)
-                x(count) = i;
-                y(count) = j;
-                count = count + 1;
+                x = [x; i];
+                y = [y; j];
             end
         end
     end
-    
-    % Deleting extra space
-    x = x(1:count-1, :);
-    y = y(1:count-1, :);
 
     % Plot features
     imshow(I)
