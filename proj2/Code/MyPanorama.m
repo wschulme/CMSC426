@@ -46,7 +46,9 @@ function [pano] = MyPanorama()
         D2 = (D2 - mean(D2))/std(D2);
 
         %% Feature Matching
-
+        
+        showMatchedFeatures(D1, D2, matchedPoints1, matchedPoints2, varargin);
+        
         %% RANSAC step
 
         %% Projection (Optional)
@@ -58,4 +60,7 @@ end
 
 function img = getGrayImage(i, path)
     img = rgb2gray(imread(fullfile(path(i).folder, path(i).name)));
+end
+
+function [match1,match2] = getMatchedPoints()
 end
