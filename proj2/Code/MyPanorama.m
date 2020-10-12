@@ -1,21 +1,19 @@
 function [pano] = MyPanorama()
     clear;
     
-    IMGSET = 1;
-    
-    selector = strcat('../Images/Set', num2str(IMGSET), '/*.jpg');
-    path = dir(selector);
-    imgN = length(path);
-    
     %% Constants
     N_Best = 300;
     match_thresh = .85;
     RANSAC_thresh = 2;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
+    IMGSET = 1;
     
     %% Variables
     pano = getGrayImage(1, path);
+    selector = strcat('../Images/Set', num2str(IMGSET), '/*.jpg');
+    path = dir(selector);
+    imgN = length(path);
     
     %for img = 2:imgN
     for img = 2:2
