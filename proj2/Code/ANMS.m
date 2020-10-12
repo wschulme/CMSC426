@@ -6,10 +6,10 @@
 function p = ANMS(I, NBest)
     
     % Detecting features by using corneremetric Algo
-    processed = cornermetric(I);
+    cornerScoreImg = cornermetric(I);
     
     % Gets max of processed matrix
-    features = imregionalmax(processed);
+    features = imregionalmax(cornerScoreImg);
     
     % Getting size of image
     sz = size(I);
@@ -21,6 +21,8 @@ function p = ANMS(I, NBest)
     for i = 1:sz(1)
         for j = 1:sz(2)
             if(features(i,j) == 1)
+                % We need to invert the local maxima, so we add this
+                % pixel's y value to x and x value to y.
                 x = [x; j];
                 y = [y; i];
             end
@@ -42,11 +44,10 @@ function p = ANMS(I, NBest)
         % We check if the metric scores are bigger between the current
         % point and the previous, if it is we then get the distances. We
         % then iteratively get smaller distances.
-        % Switched from metric(j) > metric(i) for Harris
-        %j
-        %y(j)
         
-        if processed(y(j), x(j)) > processed(y(i), x(i))
+        % We have to 'undo' the inversion here as to not go out of bounds
+        % in the original image.
+        if cornerScoreImg(y(j), x(j)) > cornerScoreImg(y(i), x(i))
           % Calculate distance
           ED = (y(j) - y(i))^2 + (x(j) - x(i))^2;
           if (ED < radius(i))
@@ -68,6 +69,6 @@ function p = ANMS(I, NBest)
     % Plot new spaced features
     imshow(I)
     hold on
-    plot(p(:,1),p(:,2), 'Color', 'r', 'Marker','x', 'LineStyle','none', 'MarkerSize', 20);
+    plot(p(:,1),p(:,2), 'Color', 'r', 'Marker','.', 'LineStyle','none', 'MarkerSize', 10);
     hold off
 end
