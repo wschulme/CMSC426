@@ -11,14 +11,16 @@ function [pano] = MyPanorama()
     N_Best = 300;
     match_thresh = .85;
     RANSAC_thresh = 2;
-    maxIters = 1000;
+    MAX_ITERS = 1000;
+    FILTER = 'gaussian';
     
     %% Variables
     pano = getGrayImage(1, path);
     
-    %% Detect Corners and ANMS
-    %for img = 1:imgN
+    %for img = 2:imgN
     for img = 2:2
+        %% Detect Corners and ANMS
+        
         I1 = pano;
         I2 = getGrayImage(img, path);
         
@@ -27,9 +29,23 @@ function [pano] = MyPanorama()
     
     
         %% Feature Descriptor
-
-        f1 = features(I1);
-        f2 = features(I2);
+        
+        % Apply filter
+        H = fspecial(FILTER, 40);
+        blurred1 = imfilter(double(I1), H, 'replicate');
+        blurred2 = imfilter(double(I2), H, 'replicate');
+        
+        % Sub-sample descriptors
+        D1 = imresize(blurred1, [8 8]);
+        D2 = imresize(blurred2, [8 8]);
+        
+        % Reshape
+        D1 = reshape(D1, [64,1]);
+        D2 = reshape(D2, [64,1]);
+        
+        % Standardize
+        D1 = (D1 - mean(D1))/std(D1);
+        D2 = (D2 - mean(D2))/std(D2);
 
         %% Feature Matching
 
