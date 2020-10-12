@@ -10,10 +10,10 @@ function [pano] = MyPanorama()
     IMGSET = 1;
     
     %% Variables
-    pano = getGrayImage(1, path);
     selector = strcat('../Images/Set', num2str(IMGSET), '/*.jpg');
     path = dir(selector);
     imgN = length(path);
+    pano = getGrayImage(1, path);
     
     %for img = 2:imgN
     for img = 2:2
