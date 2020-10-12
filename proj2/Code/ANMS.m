@@ -21,8 +21,8 @@ function p = ANMS(I, NBest)
     for i = 1:sz(1)
         for j = 1:sz(2)
             if(features(i,j) == 1)
-                x = [x; i];
-                y = [y; j];
+                x = [x; j];
+                y = [y; i];
             end
         end
     end
@@ -46,7 +46,7 @@ function p = ANMS(I, NBest)
         %j
         %y(j)
         
-        if processed(x(j), y(j)) > processed(x(i), y(i))
+        if processed(y(j), x(j)) > processed(y(i), x(i))
           % Calculate distance
           ED = (y(j) - y(i))^2 + (x(j) - x(i))^2;
           if (ED < radius(i))
