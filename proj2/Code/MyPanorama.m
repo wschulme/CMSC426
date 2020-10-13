@@ -45,8 +45,8 @@ function [pano] = MyPanorama()
         D2 = (D2 - mean(D2))/std(D2);
 
         %% Feature Matching
-        [matchedPoints1, matchedPoints2] = getMatchedPoints(I1, I2, p1, p2);
-        hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage')
+        [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2);
+        hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
         
         %% RANSAC step
 
@@ -61,19 +61,19 @@ function img = getGrayImage(i, path)
     img = rgb2gray(imread(fullfile(path(i).folder, path(i).name)));
 end
 
-function [match1,match2] = getMatchedPoints(I1, I2, p1, p2)
+function [match1,match2] = getMatchedPoints(d1, d2, p1, p2)
     match1 = zeros(1,2);
     match2 = zeros(1,2);
     match1(:) = [];
     match2(:) = [];
-    [sz,sz2] = size(p1);
+    [sz,sz2] = size(d1);
     % Pick 1 point in image 1
     for i = 1:sz
         M = 0;
         N = 0;
         % Compute sum of square difference between all points in image 2
         for j = 1:sz
-            sumsq(j) = sum((I1(i,:)-I2(j,:)).^2);
+            sumsq(j) = sum((d1(i,:)-d2(j,:)).^2);    
         end
         % Get 2 lowest distance aka 2 BEST distance
         [M,N] = sort(sumsq,'descend');
@@ -82,8 +82,8 @@ function [match1,match2] = getMatchedPoints(I1, I2, p1, p2)
         % Keep the matched pair if below ratio 0.5, else reject
         % TODO: fix coordinates
         if((oneMatch/twoMatch)<0.5)
-            match1 = vertcat(match1, [p1(i,2) p1(i,1)]);
-            match2 = vertcat(match2, [p2(N(1),2) p2(N(1),1)]);
+            match1 = vertcat(match1, [p1(i,1) p1(i,2)]);
+            match2 = vertcat(match2, [p2(N(1),1) p2(N(1),2)]);
         end
     end
 end
