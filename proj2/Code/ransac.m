@@ -18,8 +18,8 @@ function i = ransac(matchedPoints1, matchedPoints2, thresh)
         end
         H = est_homography(X, Y, x, y);
         [HpiX, HpiY] = apply_homography(H, x, y);
-        X = [X, Y] - [HpiX, HpiY];
-        ssd = sum(X(:).^2)
+        difference = [X, Y] - [HpiX, HpiY];
+        ssd = sum(difference(:).^2)
         % have to figure out how to count the number of inliers and then
         % keep track of the largest set of inliers
         i = i + 1;
