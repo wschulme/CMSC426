@@ -67,11 +67,11 @@ function [match1,match2] = getMatchedPoints(I1, I2, p1, p2)
     match1(:) = [];
     match2(:) = [];
     [sz,sz2] = size(p1);
+    % Pick 1 point in image 1
     for i = 1:sz
         M = 0;
         N = 0;
         % Compute sum of square difference between all points in image 2
-        % using 1 point in image 1
         for j = 1:sz
             sumsq(j) = sum((I1(i,:)-I2(j,:)).^2);
         end
@@ -81,8 +81,8 @@ function [match1,match2] = getMatchedPoints(I1, I2, p1, p2)
         twoMatch = M(sz-1);
         % Keep the matched pair if below ratio 0.5, else reject
         if((oneMatch/twoMatch)<0.5)
-            match1 = vertcat(match1, [p2(i,1) p1(i,1)]);
-            match2 = vertcat(match2, [p2(N(1),2) p2(N(1),2)]);
+            match1 = vertcat(match1, [p1(i,2) p1(i,1)]);
+            match2 = vertcat(match2, [p2(N(1),2) p2(N(1),1)]);
         end
     end
 end
