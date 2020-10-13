@@ -15,7 +15,7 @@ function [match1,match2] = getMatchedPoints(d1, d2, p1, p2, thresh)
         % TODO: fix coordinates
         if((oneMatch/twoMatch) < thresh)
             match1 = vertcat(match1, [p1(i,1) p1(i,2)]);
-            match2 = vertcat(match2, [p2(N(1),1) p2(N(1),2)]);
+            match2 = vertcat(match2, [p2(N(sz),1) p2(N(sz),2)]);
         end
     end
 end
