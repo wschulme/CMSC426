@@ -8,7 +8,6 @@ function d = getFeatureDescriptors(p, H, I)
         column = p(i, 1);
         row = p(i, 2);
         
-        %if ((column > 20 && column < w-20) && (row > 20 && row < h-20))
         subImage = I(row-19:row+20, column-19:column+20);
         blurred = imfilter(subImage, H, 'replicate');
 
@@ -19,6 +18,5 @@ function d = getFeatureDescriptors(p, H, I)
         dCurr = dCurr / std(dCurr);
 
         d = [d dCurr];
-        %end
     end
 end
