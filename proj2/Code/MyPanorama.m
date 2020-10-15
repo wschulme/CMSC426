@@ -3,7 +3,7 @@ function [pano] = MyPanorama()
     
     %% Constants
     N_Best = 300;
-    match_thresh = .75;
+    match_thresh = .5;
     RANSAC_thresh = 2;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
@@ -31,6 +31,7 @@ function [pano] = MyPanorama()
         
         D1 = getFeatureDescriptors(p1, H, I1);
         D2 = getFeatureDescriptors(p2, H, I2);
+        disp(D2);
  
         %% Feature Matching
         [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2, match_thresh);

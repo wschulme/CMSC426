@@ -15,7 +15,8 @@ function d = getFeatureDescriptors(p, H, I)
             dCurr = imresize(blurred, [8 8]);
             dCurr = double(reshape(dCurr, [64,1]));
             
-            dCurr = (dCurr - mean(dCurr))/std(dCurr);
+            dCurr = dCurr - mean(dCurr);
+            dCurr = dCurr / std(dCurr);
             
             d = [d dCurr];
         end
