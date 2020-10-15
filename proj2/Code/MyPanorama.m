@@ -3,7 +3,7 @@ function [pano] = MyPanorama()
     
     %% Constants
     N_Best = 300;
-    match_thresh = .85;
+    match_thresh = .75;
     RANSAC_thresh = 2;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
@@ -26,24 +26,12 @@ function [pano] = MyPanorama()
         p2 = ANMS(I2, N_Best);
     
         %% Feature Descriptor
-        
-        % Apply filter
+        % Get filter
         H = fspecial(FILTER, 40);
-        blurred1 = imfilter(double(I1), H, 'replicate');
-        blurred2 = imfilter(double(I2), H, 'replicate');
         
-        % Sub-sample descriptors
-        D1 = imresize(blurred1, [8 8]);
-        D2 = imresize(blurred2, [8 8]);
-        
-        % Reshape
-        D1 = reshape(D1, [64,1]);
-        D2 = reshape(D2, [64,1]);
-        
-        % Standardize
-        D1 = (D1 - mean(D1))/std(D1);
-        D2 = (D2 - mean(D2))/std(D2);
-
+        D1 = getFeatureDescriptors(p1, H, I1);
+        D2 = getFeatureDescriptors(p2, H, I2);
+ 
         %% Feature Matching
         [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2, match_thresh);
         hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
