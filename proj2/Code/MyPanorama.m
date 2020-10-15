@@ -37,7 +37,8 @@ function [pano] = MyPanorama()
         hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
         
         %% RANSAC step
-
+        ransac(matchedPoints1, matchedPoints2, match_thresh);
+        
         %% Projection (Optional)
 
         %% Blending
