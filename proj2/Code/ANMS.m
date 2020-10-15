@@ -18,8 +18,8 @@ function p = ANMS(I, NBest)
     y = [];
 
     % Going through the array and getting all the coordinates for the 1's
-    for i = 1:sz(1)
-        for j = 1:sz(2)
+    for i = 20:sz(1)-20
+        for j = 20:sz(2)-20
             if(features(i,j) == 1)
                 % We need to invert the local maxima, so we add this
                 % pixel's y value to x and x value to y.
