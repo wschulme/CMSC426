@@ -1,6 +1,6 @@
-function H = ransac(matchedPoints1, matchedPoints2, thresh, I1, I2)
+function [mP1, mP2, H] = ransac(matchedPoints1, matchedPoints2, thresh, I1, I2)
     i = 0;
-    N = 1000; % user set number
+    N = 200; % user set number
     sz = length(matchedPoints1);
     % these 4 arrays are my set of inliers
     x_I1 = [];
