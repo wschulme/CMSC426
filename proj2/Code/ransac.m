@@ -1,6 +1,6 @@
-function H = ransac(matchedPoints1, matchedPoints2, thresh)
+function H = ransac(matchedPoints1, matchedPoints2, thresh, I1, I2)
     i = 0;
-    N = 10; % user set number
+    N = 100; % user set number
     sz = length(matchedPoints1);
     % these 4 arrays are my set of inliers
     x_I1 = [];
@@ -25,14 +25,17 @@ function H = ransac(matchedPoints1, matchedPoints2, thresh)
         H = est_homography(X, Y, x, y);
         [Hpix, Hpiy] = apply_homography(H, x, y);
         difference = [X, Y] - [Hpix, Hpiy];
-        ssd = sum(difference(:).^2);
+        ssd = sum(difference(:).^2)
         if (ssd < thresh) % still have to figure out what thresh should be
             x_I1 = cat(1,x_I1,x);
             y_I1 = cat(1,y_I1,y);
-            x_I2 = cat(1,x_I2,x);
-            y_I2 = cat(1,y_I2,y);
+            x_I2 = cat(1,x_I2,X);
+            y_I2 = cat(1,y_I2,Y);
         end
         i = i + 1;
     end
+    mP1 = [x_I1, y_I1];
+    mP2 = [x_I2, y_I2];
+    hImage = showMatchedFeatures(I1, I2, mP1, mP2, 'montage');
     H = est_homography(x_I2, y_I2, x_I1, y_I1);
 end

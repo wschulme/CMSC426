@@ -3,7 +3,7 @@ function [pano] = MyPanorama()
     
     %% Constants
     N_Best = 300;
-    match_thresh = .5;
+    match_thresh = .05;
     RANSAC_thresh = 2;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
@@ -34,11 +34,10 @@ function [pano] = MyPanorama()
  
         %% Feature Matching
         [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2, match_thresh);
-        hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
+        %hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
         
         %% RANSAC step
-        ransac(matchedPoints1, matchedPoints2, match_thresh);
-        
+        ransac(matchedPoints1, matchedPoints2, match_thresh, I1, I2);
         %% Projection (Optional)
 
         %% Blending
