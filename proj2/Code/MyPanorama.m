@@ -1,4 +1,4 @@
-function [pano] = MyPanorama()
+function pano = MyPanorama()
     clear;
     
     %% Constants
@@ -7,7 +7,7 @@ function [pano] = MyPanorama()
     RANSAC_thresh = 6;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
-    IMGSET = 1;
+    IMGSET = 2;
     SHOW_OUTPUT = false;
     
     %% Variables
@@ -42,18 +42,17 @@ function [pano] = MyPanorama()
         %% RANSAC step
         [r1, r2] = ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, MAX_ITERS);
         if SHOW_OUTPUT showMatchedFeatures(I1, I2, r1, r2, 'montage'); end
-        %% Projection (Optional)
 
-        %% Blending
+        %% Stitchingand Blending
         % SOURCE: https://www.mathworks.com/help/vision/ug/feature-based-panoramic-image-stitching.html
         % Estimate the transformation between I(n) and I(n-1).
         tforms(img) = estimateGeometricTransform(r2, r1, 'projective', 'Confidence', 99.9, 'MaxNumTrials', 2000);
         % Compute T(n) * T(n-1) * ... * T(1)
         tforms(img).T = tforms(img).T * tforms(img-1).T;
         
-        pano = I2;
-        
+        pano = I2;      
     end
+    disp("Warping...");
     % Blending continued outside for for loop, from SOURCE
     % Compute the output limits  for each transform
     for i = 1:numel(tforms)
@@ -96,11 +95,6 @@ function [pano] = MyPanorama()
 
     % Initialize the panorama.
     panorama = zeros(height, width, 3);
-    
-    % Use imwarp to map images into pano and use vision.AlphaBlender to
-    % overlay images
-    blender = vision.AlphaBlender('Operation', 'Binary mask', ...
-    'MaskSource', 'Input port');  
 
     % Create a 2-D spatial reference object defining the size of the panorama.
     xLimits = [xMin xMax];
@@ -114,17 +108,15 @@ function [pano] = MyPanorama()
         % Transform I into the panorama.
         warpedImage = imwarp(I, tforms(i), 'OutputView', panoramaView);
         warps{end + 1} = warpedImage;
-
-        % Generate a binary mask.    
-        mask = imwarp(true(size(I,1),size(I,2)), tforms(i), 'OutputView', panoramaView);
     end
     
     panoSize = size(panorama);
     
+    disp("Stitching and blending...");
     for i = 1 : panoSize(1)
         for j = 1 : panoSize(2)
             avg = double(zeros(1,3));
-            count = 1;
+            count = 0;
             for layer = 1 : length(warps)
                 % If this layer has a pixel
                 if warps{layer}(i,j,:) ~= [0;0;0]
@@ -135,15 +127,16 @@ function [pano] = MyPanorama()
                     count = count + 1;
                 end
             end
-            avg = avg ./ count;
+            % Let's not divide by 0
+            if count > 1
+                avg = avg ./ count;
+            end
             panorama(i,j,:) = avg;
         end
     end
     
     imshow(uint8(panorama));
     pano = panorama;
-    error("It prints out a bunch of garbage if I dont have this here and idk why");
-   
 end
 
 function img = getImage(i, path)
