@@ -16,7 +16,7 @@ function [pano] = MyPanorama()
     pano = getGrayImage(1, path);
     
     %for img = 2:imgN
-    for img = 2:2
+    for img = 2:imgN
         %% Detect Corners and ANMS
         
         I1 = pano;
@@ -44,14 +44,18 @@ function [pano] = MyPanorama()
 
         %% Blending
         % SOURCE: https://www.mathworks.com/help/vision/ug/feature-based-panoramic-image-stitching.html
-        % Get tforms between 2 images
+        % Estimate the transformation between I(n) and I(n-1).
         tforms(img) = estimateGeometricTransform(r2, r1, 'projective', 'Confidence', 99.9, 'MaxNumTrials', 2000);
+        % Compute T(n) * T(n-1) * ... * T(1)
         tforms(img).T = tforms(img).T * tforms(img-1).T;
+        
+        pano = I2;
+        
     end
-    % Blending continued outside for for loop
+    % Blending continued outside for for loop, from SOURCE
     % Compute the output limits  for each transform
     for i = 1:numel(tforms)
-    [xlim(i,:), ylim(i,:)] = outputLimits(tforms(i), [1 imageSize(i,2)], [1 imageSize(i,1)]);
+        [xlim(i,:), ylim(i,:)] = outputLimits(tforms(i), [1 imageSize(i,2)], [1 imageSize(i,1)]);
     end
 
     % Compute avg X limits for each transforms and find image that is used
@@ -105,7 +109,7 @@ function [pano] = MyPanorama()
 
     % Create the panorama.
     %for i = 1:imgN
-    for i = 1:2
+    for i = 1:imgN
 
         I = imread(loc + i + ".jpg");
 
