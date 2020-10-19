@@ -15,6 +15,7 @@ function [pano] = MyPanorama()
     path = dir(selector);
     imgN = length(path);
     pano = getImage(1, path);
+    warps = {};
     
     %for img = 2:imgN
     for img = 2:imgN
@@ -93,9 +94,8 @@ function [pano] = MyPanorama()
     width  = round(xMax - xMin);
     height = round(yMax - yMin);
 
-    % Initialize the "empty" panorama.
-    I = getImage(1, path); 
-    panorama = zeros([height width 3], 'like', I);
+    % Initialize the panorama.
+    panorama = zeros(height, width, 3);
     
     % Use imwarp to map images into pano and use vision.AlphaBlender to
     % overlay images
@@ -109,21 +109,41 @@ function [pano] = MyPanorama()
 
     % Create the panorama.
     for i = 1:imgN
-
         I = getImage(i, path);
 
         % Transform I into the panorama.
         warpedImage = imwarp(I, tforms(i), 'OutputView', panoramaView);
+        warps{end + 1} = warpedImage;
 
         % Generate a binary mask.    
         mask = imwarp(true(size(I,1),size(I,2)), tforms(i), 'OutputView', panoramaView);
-
-        % Overlay the warpedImage onto the panorama.
-        panorama = step(blender, panorama, warpedImage, mask);
     end
     
-    imshow(panorama);
+    panoSize = size(panorama);
+    
+    for i = 1 : panoSize(1)
+        for j = 1 : panoSize(2)
+            avg = double(zeros(1,3));
+            count = 1;
+            for layer = 1 : length(warps)
+                % If this layer has a pixel
+                if warps{layer}(i,j,:) ~= [0;0;0]
+                    % Add to avg
+                    avg(:,1) = avg(:,1) + double(warps{layer}(i,j,1));
+                    avg(:,2) = avg(:,2) + double(warps{layer}(i,j,2));
+                    avg(:,3) = avg(:,3) + double(warps{layer}(i,j,3));
+                    count = count + 1;
+                end
+            end
+            avg = uint8(avg ./ count);
+            panorama(i,j,:) = avg;
+        end
+    end
+    
+    imshow(panorama, []);
     pano = panorama;
+    error("It prints out a bunch of garbage if I dont have this here and idk why");
+   
 end
 
 function img = getImage(i, path)
