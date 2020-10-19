@@ -21,7 +21,7 @@ function [pano] = MyPanorama()
         
         I1 = pano;
         I2 = getGrayImage(img, path);
-        imgSize(img,:) = size(I2);
+        imageSize(img,:) = size(I2);
         
         p1 = ANMS(I1, N_Best);
         p2 = ANMS(I2, N_Best);
@@ -90,6 +90,8 @@ function [pano] = MyPanorama()
     height = round(yMax - yMin);
 
     % Initialize the "empty" panorama.
+    loc = "..\Images\Set1\";
+    I = imread(loc + "1.jpg");
     panorama = zeros([height width 3], 'like', I);
     
     % Use imwarp to map images into pano and use vision.AlphaBlender to
@@ -97,15 +99,16 @@ function [pano] = MyPanorama()
     blender = vision.AlphaBlender('Operation', 'Binary mask', ...
     'MaskSource', 'Input port');  
 
-% Create a 2-D spatial reference object defining the size of the panorama.
+    % Create a 2-D spatial reference object defining the size of the panorama.
     xLimits = [xMin xMax];
     yLimits = [yMin yMax];
     panoramaView = imref2d([height width], xLimits, yLimits);
 
     % Create the panorama.
-    for i = 1:numImages
+    %for i = 1:imgN
+    for i = 1:2
 
-        I = readimage(buildingScene, i);   
+        I = imread(loc + i + ".jpg");
 
         % Transform I into the panorama.
         warpedImage = imwarp(I, tforms(i), 'OutputView', panoramaView);
