@@ -45,7 +45,6 @@ function [pano] = MyPanorama()
         %% Blending
         % SOURCE: https://www.mathworks.com/help/vision/ug/feature-based-panoramic-image-stitching.html
         % Get tforms between 2 images
-        % TODO: CHANGE matchedPoints to r_matchedPoints from RANSAC
         tforms(img) = estimateGeometricTransform(r2, r1, 'projective', 'Confidence', 99.9, 'MaxNumTrials', 2000);
         tforms(img).T = tforms(img).T * tforms(img-1).T;
     end
