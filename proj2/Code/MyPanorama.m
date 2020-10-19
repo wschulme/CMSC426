@@ -8,6 +8,7 @@ function [pano] = MyPanorama()
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
     IMGSET = 1;
+    SHOW_OUTPUT = false;
     
     %% Variables
     selector = strcat('../Images/Set', num2str(IMGSET), '/*.jpg');
@@ -23,8 +24,8 @@ function [pano] = MyPanorama()
         I2 = getImage(img, path);
         imageSize(img,:) = size(I2);
         
-        p1 = ANMS(rgb2gray(I1), N_Best);
-        p2 = ANMS(rgb2gray(I2), N_Best);
+        p1 = ANMS(rgb2gray(I1), N_Best, SHOW_OUTPUT);
+        p2 = ANMS(rgb2gray(I2), N_Best, SHOW_OUTPUT);
     
         %% Feature Descriptor
         % Get filter
@@ -35,11 +36,11 @@ function [pano] = MyPanorama()
  
         %% Feature Matching
         [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2, match_thresh);
-        %hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
+        if SHOW_OUTPUT showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage'); end
         
         %% RANSAC step
         [r1, r2] = ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, MAX_ITERS);
-        showMatchedFeatures(I1, I2, r1, r2, 'montage');
+        if SHOW_OUTPUT showMatchedFeatures(I1, I2, r1, r2, 'montage'); end
         %% Projection (Optional)
 
         %% Blending
@@ -120,9 +121,9 @@ function [pano] = MyPanorama()
         % Overlay the warpedImage onto the panorama.
         panorama = step(blender, panorama, warpedImage, mask);
     end
-
-    figure
-    imshow(panorama)
+    
+    imshow(panorama);
+    pano = panorama;
 end
 
 function img = getImage(i, path)

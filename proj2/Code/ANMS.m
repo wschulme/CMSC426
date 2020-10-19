@@ -3,7 +3,7 @@
 % features from the corner algo. This allows us to have more points across
 % the image for processing rather than just the locations where there may
 % be more corners.
-function p = ANMS(I, NBest)
+function p = ANMS(I, NBest, SHOW_OUTPUT)
     
     % Detecting features by using corneremetric Algo
     cornerScoreImg = cornermetric(I);
@@ -28,12 +28,14 @@ function p = ANMS(I, NBest)
             end
         end
     end
-
-    % Plot features
-    imshow(I)
-    hold on
-    plot(features)
-    hold off
+    
+    if SHOW_OUTPUT
+        % Plot features
+        imshow(I)
+        hold on
+        plot(features)
+        hold off
+    end
 
     % Init variables
     NStrong = size(x, 1);
@@ -66,9 +68,11 @@ function p = ANMS(I, NBest)
     
     p = [x(:), y(:)];
     
-    % Plot new spaced features
-    imshow(I)
-    hold on
-    plot(p(:,1),p(:,2), 'Color', 'r', 'Marker','.', 'LineStyle','none', 'MarkerSize', 10);
-    hold off
+    if SHOW_OUTPUT
+        % Plot new spaced features
+        imshow(I)
+        hold on
+        plot(p(:,1),p(:,2), 'Color', 'r', 'Marker','.', 'LineStyle','none', 'MarkerSize', 10);
+        hold off
+    end
 end
