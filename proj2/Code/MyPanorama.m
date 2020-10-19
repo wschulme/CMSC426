@@ -135,12 +135,12 @@ function [pano] = MyPanorama()
                     count = count + 1;
                 end
             end
-            avg = uint8(avg ./ count);
+            avg = avg ./ count;
             panorama(i,j,:) = avg;
         end
     end
     
-    imshow(panorama, []);
+    imshow(uint8(panorama));
     pano = panorama;
     error("It prints out a bunch of garbage if I dont have this here and idk why");
    
