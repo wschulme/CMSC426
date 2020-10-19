@@ -13,18 +13,18 @@ function [pano] = MyPanorama()
     selector = strcat('../Images/Set', num2str(IMGSET), '/*.jpg');
     path = dir(selector);
     imgN = length(path);
-    pano = getGrayImage(1, path);
+    pano = getImage(1, path);
     
     %for img = 2:imgN
     for img = 2:imgN
         %% Detect Corners and ANMS
         
         I1 = pano;
-        I2 = getGrayImage(img, path);
+        I2 = getImage(img, path);
         imageSize(img,:) = size(I2);
         
-        p1 = ANMS(I1, N_Best);
-        p2 = ANMS(I2, N_Best);
+        p1 = ANMS(rgb2gray(I1), N_Best);
+        p2 = ANMS(rgb2gray(I2), N_Best);
     
         %% Feature Descriptor
         % Get filter
@@ -93,8 +93,7 @@ function [pano] = MyPanorama()
     height = round(yMax - yMin);
 
     % Initialize the "empty" panorama.
-    loc = "..\Images\Set1\";
-    I = imread(loc + "1.jpg");
+    I = getImage(1, path); 
     panorama = zeros([height width 3], 'like', I);
     
     % Use imwarp to map images into pano and use vision.AlphaBlender to
@@ -108,10 +107,9 @@ function [pano] = MyPanorama()
     panoramaView = imref2d([height width], xLimits, yLimits);
 
     % Create the panorama.
-    %for i = 1:imgN
     for i = 1:imgN
 
-        I = imread(loc + i + ".jpg");
+        I = getImage(i, path);
 
         % Transform I into the panorama.
         warpedImage = imwarp(I, tforms(i), 'OutputView', panoramaView);
@@ -127,6 +125,6 @@ function [pano] = MyPanorama()
     imshow(panorama)
 end
 
-function img = getGrayImage(i, path)
-    img = rgb2gray(imread(fullfile(path(i).folder, path(i).name)));
+function img = getImage(i, path)
+    img = imread(fullfile(path(i).folder, path(i).name));
 end
