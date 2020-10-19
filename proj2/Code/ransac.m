@@ -1,39 +1,54 @@
-function [mP1, mP2, H] = ransac(matchedPoints1, matchedPoints2, thresh, I1, I2 ,N)
-    i = 0;
-    sz = length(matchedPoints1);
-    % these 4 arrays are my set of inliers
-    x_I1 = [];
-    y_I1 = [];
-    x_I2 = [];
-    y_I2 = [];
-    while ( i < N)
-        j = 1;
-        x = zeros(4,1);
-        y = zeros(4,1);
-        X = zeros(4,1);
-        Y = zeros(4,1);
-        while (j < 5)
-            rand = randi([1,sz]); % bc matchedPoints1 is a matrix of sz points
-            x(j) = matchedPoints1(rand, 1);
-            y(j) = matchedPoints1(rand, 2);
-            X(j) = matchedPoints2(rand, 1);
-            Y(j) = matchedPoints2(rand, 2);
-            j = j + 1;
+function [result1, result2] = ransac(m1, m2, thresh, maxIters)
+    %Number of samples
+    N = length(m1);
+    idealInliers = N * .9;
+    currInliers = [];
+    bestInliers = [];
+    iter = 0;
+    
+    disp("Running Ransac...");
+    while (iter < maxIters) && (length(bestInliers) < idealInliers)
+        pRand = randperm(N, 4);
+        
+        % 4 random features from I1
+        x_source = [m1(pRand(1),1); m1(pRand(2),1); m1(pRand(3),1); m1(pRand(4),1)];
+        y_source = [m1(pRand(1),2); m1(pRand(2),2); m1(pRand(3),2); m1(pRand(4),2)];
+        
+        % And their corresponding pair in I2
+        x_dest = [m2(pRand(1),1); m2(pRand(2),1); m2(pRand(3),1); m2(pRand(4),1)];
+        y_dest = [m2(pRand(1),2); m2(pRand(2),2); m2(pRand(3),2); m2(pRand(4),2)];
+        
+        H = est_homography(x_dest, y_dest, x_source, y_source);
+        
+        for j = 1:N
+            %Apply homography to each feature pair
+            [Hpix, Hpiy] = apply_homography(H, m1(j,1), m1(j,2));
+            difference = [m2(j,1), m2(j,2)] - [Hpix, Hpiy];
+            ssd = sum(difference(:).^2);
+            
+            %If SSD is less than the thresh?
+            if ssd < thresh
+                %This index is an inlier
+                currInliers(end + 1) = j;
+            end
         end
-        H = est_homography(X, Y, x, y);
-        [Hpix, Hpiy] = apply_homography(H, x, y);
-        difference = [X, Y] - [Hpix, Hpiy];
-        ssd = sum(difference(:).^2)
-        if (ssd < thresh) % still have to figure out what thresh should be
-            x_I1 = cat(1,x_I1,x);
-            y_I1 = cat(1,y_I1,y);
-            x_I2 = cat(1,x_I2,X);
-            y_I2 = cat(1,y_I2,Y);
+        
+        % Does this homography result in more inliers than the most we've
+        % seen?
+        if length(currInliers) > length(bestInliers)
+            % This set of indeces is the best
+            bestInliers = currInliers;
         end
-        i = i + 1;
+        
+        if mod(iter,100) == 0
+            disp(strcat("Iter: ", num2str(iter)));
+        end
+        
+        currInliers = [];
+        iter = iter + 1;
     end
-    mP1 = [x_I1, y_I1];
-    mP2 = [x_I2, y_I2];
-    hImage = showMatchedFeatures(I1, I2, mP1, mP2, 'montage');
-    H = est_homography(x_I2, y_I2, x_I1, y_I1);
+    disp(strcat("Finished on iter: ", num2str(iter)));
+    
+    result1 = m1(bestInliers, :);
+    result2 = m2(bestInliers, :);
 end

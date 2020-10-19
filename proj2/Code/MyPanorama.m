@@ -3,7 +3,7 @@ function [pano] = MyPanorama()
     
     %% Constants
     N_Best = 300;
-    match_thresh = .2;
+    match_thresh = .5;
     RANSAC_thresh = 6;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
@@ -38,14 +38,15 @@ function [pano] = MyPanorama()
         %hImage = showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
         
         %% RANSAC step
-        ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, I1, I2, MAX_ITERS);
+        [r1, r2] = ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, MAX_ITERS);
+        showMatchedFeatures(I1, I2, r1, r2, 'montage');
         %% Projection (Optional)
 
         %% Blending
         % SOURCE: https://www.mathworks.com/help/vision/ug/feature-based-panoramic-image-stitching.html
         % Get tforms between 2 images
         % TODO: CHANGE matchedPoints to r_matchedPoints from RANSAC
-        tforms(img) = estimateGeometricTransform(matchedPoints2, matchedPoints1, 'projective', 'Confidence', 99.9, 'MaxNumTrials', 2000);
+        tforms(img) = estimateGeometricTransform(r2, r1, 'projective', 'Confidence', 99.9, 'MaxNumTrials', 2000);
         tforms(img).T = tforms(img).T * tforms(img-1).T;
     end
     % Blending continued outside for for loop
