@@ -7,7 +7,7 @@ function pano = MyPanorama()
     RANSAC_thresh = 2;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
-    IMGSET = 1;
+    IMGSET = 4;
     SHOW_OUTPUT = false;
     MODE = 'test';
     MANY = false;
@@ -24,6 +24,7 @@ function pano = MyPanorama()
     pano = getImage(1, path);
     warps = {};
     if imgN > 4 MANY = true; end
+    
     
     %for img = 2:imgN
     for img = 2:imgN
@@ -47,7 +48,7 @@ function pano = MyPanorama()
         [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2, match_thresh);
         if SHOW_OUTPUT showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage'); end
         if length(matchedPoints1) < 20
-            error("images don't match");
+            error(strcat("Number of matched points is insufficient. Make sure image ", num2str(img), " connects with the ones before."));
         end
         %% RANSAC step
         [r1, r2] = ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, MAX_ITERS);
