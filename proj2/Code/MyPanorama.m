@@ -6,10 +6,10 @@ function pano = MyPanorama()
     match_thresh = .5;
     RANSAC_thresh = 2;
     MAX_ITERS = 1000;
-    FILTER = 'gaussian';
-    IMGSET = 4;
+    FILTER = 'motion';
+    IMGSET = 1;
     SHOW_OUTPUT = false;
-    MODE = 'test';
+    MODE = 'train';
     MANY = false;
     
     %% Variables
@@ -39,7 +39,7 @@ function pano = MyPanorama()
     
         %% Feature Descriptor
         % Get filter
-        H = fspecial(FILTER, 40);
+        H = fspecial(FILTER,9,15);
         
         D1 = getFeatureDescriptors(p1, H, I1);
         D2 = getFeatureDescriptors(p2, H, I2);
