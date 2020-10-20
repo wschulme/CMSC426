@@ -41,7 +41,9 @@ function pano = MyPanorama()
         %% Feature Matching
         [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2, match_thresh);
         if SHOW_OUTPUT showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage'); end
-        
+        if length(matchedPoints1) < 20
+            error("images don't match");
+        end
         %% RANSAC step
         [r1, r2] = ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, MAX_ITERS);
         if SHOW_OUTPUT showMatchedFeatures(I1, I2, r1, r2, 'montage'); end
