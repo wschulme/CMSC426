@@ -7,13 +7,18 @@ function pano = MyPanorama()
     RANSAC_thresh = 2;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
-    IMGSET = 2;
+    IMGSET = 1;
     SHOW_OUTPUT = false;
-    MODE = 'train';
+    MODE = 'test';
     MANY = false;
     
     %% Variables
-    selector = strcat('../Images/',MODE,'_images/Set', num2str(IMGSET), '/*.jpg');
+    if strcmp(MODE,'train')
+    selector = strcat('../Images/train_images/Set', num2str(IMGSET), '/*.jpg');
+    else
+        %Test
+        selector = strcat('../Images/test_images/TestSet', num2str(IMGSET), '/*.jpg');
+    end
     path = dir(selector);
     imgN = length(path);
     pano = getImage(1, path);
