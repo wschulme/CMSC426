@@ -45,10 +45,10 @@ function pano = MyPanorama()
         [r1, r2] = ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, MAX_ITERS);
         if SHOW_OUTPUT showMatchedFeatures(I1, I2, r1, r2, 'montage'); end
 
-        %% Stitchingand Blending
+        %% Stitching and Blending
         % SOURCE: https://www.mathworks.com/help/vision/ug/feature-based-panoramic-image-stitching.html
         % Estimate the transformation between I(n) and I(n-1).
-        tforms(img) = estimateGeometricTransform(r2, r1, 'projective', 'Confidence', 99.9, 'MaxNumTrials', 2000);
+        tforms(img) = fitgeotrans(r2, r1, 'projective');
         % Compute T(n) * T(n-1) * ... * T(1)
         tforms(img).T = tforms(img).T * tforms(img-1).T;
         
