@@ -9,10 +9,11 @@ function pano = MyPanorama()
     FILTER = 'gaussian';
     IMGSET = 2;
     SHOW_OUTPUT = false;
+    MODE = 'train';
     MANY = false;
     
     %% Variables
-    selector = strcat('../Images/Set', num2str(IMGSET), '/*.jpg');
+    selector = strcat('../Images/',MODE,'_images/Set', num2str(IMGSET), '/*.jpg');
     path = dir(selector);
     imgN = length(path);
     pano = getImage(1, path);
