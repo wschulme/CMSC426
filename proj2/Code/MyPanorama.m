@@ -4,11 +4,11 @@ function pano = MyPanorama()
     %% Constants
     N_Best = 300;
     match_thresh = .5;
-    RANSAC_thresh = 2;
+    RANSAC_thresh = 1;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
     IMGSET = 1;
-    SHOW_OUTPUT = false;
+    SHOW_OUTPUT = true;
     MODE = 'train';
     MANY = false;
     
@@ -46,13 +46,19 @@ function pano = MyPanorama()
  
         %% Feature Matching
         [matchedPoints1, matchedPoints2] = getMatchedPoints(D1, D2, p1, p2, match_thresh);
-        if SHOW_OUTPUT showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage'); end
+        if SHOW_OUTPUT 
+            figure
+            showMatchedFeatures(I1, I2, matchedPoints1, matchedPoints2, 'montage');
+        end
         if length(matchedPoints1) < 20
             error(strcat("Number of matched points is insufficient. Make sure image ", num2str(img), " connects with the ones before."));
         end
         %% RANSAC step
         [r1, r2] = ransac(matchedPoints1, matchedPoints2, RANSAC_thresh, MAX_ITERS);
-        if SHOW_OUTPUT showMatchedFeatures(I1, I2, r1, r2, 'montage'); end
+        if SHOW_OUTPUT 
+            figure
+            showMatchedFeatures(I1, I2, r1, r2, 'montage');
+        end
 
         %% Stitching and Blending
         % SOURCE: https://www.mathworks.com/help/vision/ug/feature-based-panoramic-image-stitching.html
