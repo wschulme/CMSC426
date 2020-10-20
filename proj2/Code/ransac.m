@@ -40,10 +40,6 @@ function [result1, result2] = ransac(m1, m2, thresh, maxIters)
             bestInliers = currInliers;
         end
         
-        if mod(iter,100) == 0
-            disp(strcat("Iter: ", num2str(iter)));
-        end
-        
         currInliers = [];
         iter = iter + 1;
     end

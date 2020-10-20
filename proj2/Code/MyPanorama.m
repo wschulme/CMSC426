@@ -4,11 +4,12 @@ function pano = MyPanorama()
     %% Constants
     N_Best = 300;
     match_thresh = .5;
-    RANSAC_thresh = 6;
+    RANSAC_thresh = 2;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
     IMGSET = 2;
     SHOW_OUTPUT = false;
+    MANY = false;
     
     %% Variables
     selector = strcat('../Images/Set', num2str(IMGSET), '/*.jpg');
@@ -16,6 +17,7 @@ function pano = MyPanorama()
     imgN = length(path);
     pano = getImage(1, path);
     warps = {};
+    if imgN > 4 MANY = true; end
     
     %for img = 2:imgN
     for img = 2:imgN
@@ -88,10 +90,15 @@ function pano = MyPanorama()
 
     yMin = min([1; ylim(:)]);
     yMax = max([maxImageSize(1); ylim(:)]);
-
-    % Width and height of panorama.
-    width  = round(xMax - xMin);
-    height = round(yMax - yMin);
+    
+    if(MANY)
+        % Width and height of panorama.
+        width  = round((xMax - xMin) * .1);
+        height = round((yMax - yMin) * .1);
+    else
+        width  = round(xMax - xMin);
+        height = round(yMax - yMin);
+    end
 
     % Initialize the panorama.
     panorama = zeros(height, width, 3);
@@ -134,8 +141,9 @@ function pano = MyPanorama()
             panorama(i,j,:) = avg;
         end
     end
-    
+    figure
     imshow(uint8(panorama));
+    
     pano = panorama;
 end
 
