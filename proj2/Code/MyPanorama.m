@@ -14,10 +14,12 @@ function pano = MyPanorama()
     
     %% Variables
     if strcmp(MODE,'train')
-    selector = strcat('../Images/train_images/Set', num2str(IMGSET), '/*.jpg');
-    else
+        selector = strcat('../Images/train_images/Set', num2str(IMGSET), '/*.jpg');
+    elseif strcmp(MODE,'test')
         %Test
         selector = strcat('../Images/test_images/TestSet', num2str(IMGSET), '/*.jpg');
+    else
+        selector = strcat('../Images/custom_images/Set', num2str(IMGSET), '/*.jpg'); 
     end
     path = dir(selector);
     imgN = length(path);
