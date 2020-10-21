@@ -1,4 +1,0 @@
-1. Throw error if images have no matches.
-2. Cylindrical projection (optional)
-3. Report.
-4. Make sure `estimateGeometricTransform` is allowed.
