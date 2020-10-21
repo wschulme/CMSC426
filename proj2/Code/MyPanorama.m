@@ -23,16 +23,14 @@ function pano = MyPanorama()
     end
     path = dir(selector);
     imgN = length(path);
-    pano = getImage(1, path);
     warps = {};
     if imgN > 4 MANY = true; end
     
     
-    %for img = 2:imgN
     for img = 2:imgN
         %% Detect Corners and ANMS
         
-        I1 = pano;
+        I1 = getImage(img-1, path);
         I2 = getImage(img, path);
         imageSize(img,:) = size(I2);
         
@@ -65,11 +63,11 @@ function pano = MyPanorama()
         %% Stitching and Blending
         % SOURCE: https://www.mathworks.com/help/vision/ug/feature-based-panoramic-image-stitching.html
         % Estimate the transformation between I(n) and I(n-1).
-        tforms(img) = fitgeotrans(r2, r1, 'projective');
+        H= est_homography(r2(:,1), r2(:,2), r1(:,1), r1(:,2));
+        tform = invert(projective2d(H'));
+        tforms(img) = tform;
         % Compute T(n) * T(n-1) * ... * T(1)
-        tforms(img).T = tforms(img).T * tforms(img-1).T;
-        
-        pano = I2;      
+        tforms(img).T = tforms(img).T * tforms(img-1).T;     
     end
     disp("Warping...");
     % Blending continued outside for for loop, from SOURCE
