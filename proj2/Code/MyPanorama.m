@@ -7,15 +7,9 @@ function pano = MyPanorama()
     RANSAC_thresh = 1;
     MAX_ITERS = 1000;
     FILTER = 'gaussian';
-<<<<<<< Updated upstream
-    IMGSET = 4;
-    SHOW_OUTPUT = false;
-    MODE = 'test';
-=======
     IMGSET = 1;
     SHOW_OUTPUT = false;
     MODE = 'train';
->>>>>>> Stashed changes
     MANY = false;
     
     %% Variables
