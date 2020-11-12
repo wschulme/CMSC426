@@ -10,6 +10,8 @@ ProbMaskThreshold = -1;
 NumWindows= -1; 
 BoundaryWidth = -1;
 
+ROIPOLY = false;
+
 % Load images:
 fpath = '../input';
 files = dir(fullfile(fpath, '*.jpg'));
@@ -29,7 +31,12 @@ for i=1:length(files)
 end
 
 % NOTE: to save time during development, you should save/load your mask rather than use ROIPoly every time.
-mask = roipoly(images{1});
+if ROIPOLY
+    mask = roipoly(images{1});
+    save('mask.mat','mask');
+else
+    mask = load('mask.mat', 'mask');
+end
 
 imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
 set(gca,'position',[0 0 1 1],'units','normalized')
