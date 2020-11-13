@@ -3,7 +3,6 @@
 % We've included an outline of what you should be doing, and some helful visualizations.
 % However many of the most important functions are left for you to implement.
 % Feel free to modify this code as you see fit.
-
 % Some parameters you need to tune:
 WindowWidth = 30;  
 ProbMaskThreshold = .001; 
@@ -42,10 +41,10 @@ end
 set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
-imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
+%imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
 outputVideo = VideoWriter(fullfile(fpath,'video.mp4'),'MPEG-4');
 open(outputVideo);
-writeVideo(outputVideo,I);
+%writeVideo(outputVideo,I);
 
 % Sample local windows and initialize shape+color models:
 [mask_outline, LocalWindows] = initLocalWindows(images{1},mask,NumWindows,WindowWidth,true);

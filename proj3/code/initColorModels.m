@@ -6,20 +6,42 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     SIGMA_C = WindowWidth/2;
     REG = .001;
     NUM_GAUSS = 3;
+    IMG = rgb2lab(IMG);
+    
+    %% Select Foreground and Background
+    fore_mask = bwdist(MaskOutline)>BoundaryWidth & Mask;
+    back_mask = bwdist(MaskOutline)>BoundaryWidth & ~Mask;
+    
+    figure
+    imshow(fore_mask | back_mask);
     
     for window = 1:length(LocalWindows)
-        x = LocalWindows(window, 1)
-        y = LocalWindows(window, 2)
+        %% Gather Pixels
+        x_w = LocalWindows(window, 1);
+        y_w = LocalWindows(window, 2);
         
-        IMG = rgb2lab(IMG((y - SIGMA_C):(y + SIGMA_C),(x - SIGMA_C):(x + SIGMA_C),:));
-        %% Select Foreground and Background
-        [f_r, f_c] = find(bwdist(Mask)>BoundaryWidth)
-        [b_r, b_c] = find(bwdist(~Mask)>BoundaryWidth)
-
-        %% Select RGB Values
-        foreground = impixel(IMG, f_c, f_r);
-        background = impixel(IMG, b_c, b_r);
-
+        foreground = [];
+        background = [];
+        
+        for x = x_w - SIGMA_C: x_w + SIGMA_C
+            for y = y_w - SIGMA_C: y_w + SIGMA_C
+                pixel = impixel(IMG, x, y);
+                
+                %LMFAO I have no idea why I need to invert this but I do
+                if fore_mask(y, x) == 1
+                    foreground = vertcat(foreground, pixel);
+                elseif back_mask(y, x) == 1
+                    background = vertcat(background, pixel);
+                end
+            end
+        end
+        
+        Win = (IMG((y_w - SIGMA_C):(y_w + SIGMA_C),(x_w - SIGMA_C):(x_w + SIGMA_C),:));
+        
+        
+        disp(size(foreground));
+        disp(size(background));
+        
         %% Compute GMM
 
         gmm_f = fitgmdist(foreground, NUM_GAUSS, 'RegularizationValue', REG);
@@ -27,8 +49,8 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
 
         %% Apply Model
         
-        [r, c, ~] = size(IMG);
-        window_channels = reshape(double(IMG),[r*c 3]);
+        [r, c, ~] = size(Win);
+        window_channels = reshape(double(Win),[r*c 3]);
 
         likelihood_f = pdf(gmm_f,window_channels);
         likelihood_b = pdf(gmm_b,window_channels);
@@ -39,8 +61,10 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
 
         %% Calculate Color Model Confidence
 
-        L_t = reshape(Mask(IMG),[],1)
-        d = reshape(bwdist(MaskOutline(IMG)),[], 1)
+        L_t = foreground;
+        
+        %This shit doesn't work
+        d = reshape(bwdist(MaskOutline(Win)),[], 1);
 
         w_c = exp(-d.^2/SIGMA_C^2);
         ColorModels(window).Confidences = 1 - sum( abs(L_t-ColorModels(win).prob).*w_c )/sum(w_c);
