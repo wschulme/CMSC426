@@ -5,10 +5,10 @@
 % Feel free to modify this code as you see fit.
 
 % Some parameters you need to tune:
-WindowWidth = -1;  
-ProbMaskThreshold = -1; 
-NumWindows= -1; 
-BoundaryWidth = -1;
+WindowWidth = 30;  
+ProbMaskThreshold = .001; 
+NumWindows= 15; 
+BoundaryWidth = 5;
 
 ROIPOLY = false;
 
@@ -35,10 +35,10 @@ if ROIPOLY
     mask = roipoly(images{1});
     save('mask.mat','mask');
 else
-    mask = load('mask.mat', 'mask');
+    load('mask.mat', 'mask');
 end
 
-imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
+%imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
 set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
