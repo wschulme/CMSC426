@@ -36,6 +36,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
             (middle(2) - SIGMA_C):(middle(2) + SIGMA_C));
        
         %Iterate over the window (Win).
+        disp(Win_mask);
         for x = 1:size(Win,1)
             for y = 1:size(Win,2)
                 %Get the pixel values.
@@ -44,9 +45,9 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
                 
                 %Append the channel values to their appropriate
                 %classification.
-                if Win_mask(x, y) == 1 && d_x(x,y) < BoundaryWidth
+                if Win_mask(x, y) == 1 && d_x(x, y) > BoundaryWidth
                     foreground = vertcat(foreground, pixel);
-                elseif Win_mask(x, y) == 0 && d_x(x,y) < BoundaryWidth
+                elseif Win_mask(x, y) == 0 && d_x(x, y) > BoundaryWidth
                     background = vertcat(background, pixel);
                 end
             end
