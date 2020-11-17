@@ -7,7 +7,6 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     REG = .001;
     NUM_GAUSS = 3;
     IMG = rgb2lab(IMG);
-    
     dx_init = bwdist(MaskOutline);
     
     %Just a visualization for the mask (fore/back).
@@ -21,27 +20,24 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         
         foreground = [];
         background = [];
-        middle = [(y_w + SIGMA_C) (x_w + SIGMA_C)];
         
         %We draw this window with the x and y coordinates as the center.
         %NOTE: SIGMA_C is equal to WindowWidth/2. I just used this to save
         %space.
-        Win = (IMG((middle(1) - SIGMA_C):(middle(1) + SIGMA_C), ...
-            (middle(2) - SIGMA_C):(middle(2) + SIGMA_C),:));
+        Win = (IMG((x_w - SIGMA_C):(x_w + SIGMA_C), ...
+            (y_w - SIGMA_C):(y_w + SIGMA_C),:));
         
-        Win_mask = Mask((middle(1) - SIGMA_C):(middle(1) + SIGMA_C), ...
-            (middle(2) - SIGMA_C):(middle(2) + SIGMA_C),:);
+        Win_mask = Mask((x_w - SIGMA_C):(x_w + SIGMA_C), ...
+            (y_w - SIGMA_C):(y_w + SIGMA_C),:);
         
-        d_x = dx_init((middle(1) - SIGMA_C):(middle(1) + SIGMA_C), ...
-            (middle(2) - SIGMA_C):(middle(2) + SIGMA_C));
+        d_x = dx_init((x_w - SIGMA_C):(x_w + SIGMA_C), ...
+            (y_w - SIGMA_C):(y_w + SIGMA_C));
        
         %Iterate over the window (Win).
-        disp(Win_mask);
         for x = 1:size(Win,1)
             for y = 1:size(Win,2)
                 %Get the pixel values.
                 pixel = impixel(Win, x, y);
-                disp(pixel);
                 
                 %Append the channel values to their appropriate
                 %classification.
@@ -84,7 +80,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         ColorModels(window).gmm_b = gmm_b;
         ColorModels(window).prob = prob;
         ColorModels(window).dist = d_x;
-        disp("Prob size (reshaped): " + size(ColorModels(window).prob));
+        %disp("Prob size (reshaped): " + size(ColorModels(window).prob));
 
         %% Calculate Color Model Confidence
         
