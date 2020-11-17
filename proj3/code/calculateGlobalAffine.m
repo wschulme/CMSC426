@@ -7,8 +7,6 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
 	max_x = max(mask_coordinates(:,1));
 	min_y = min(mask_coordinates(:,2));
 	max_y = max(mask_coordinates(:,2));
-    disp("min x: " + min_x + " min y: " + min_y);
-    disp("max x: " + max_x + " max y: " + max_y);
     
     % We allow a small pixel room for error to account for difference in
     % frames.
@@ -21,12 +19,12 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     img2 = img2(min_x-error:max_x+error, min_y-error:max_y+error);
     
     %[x y width height]
-    ROI = [1 1 max_x-min_x max_y-min_y];
+    %ROI = [1 1 max_x-min_x max_y-min_y];
     
     % Getting the features for analyizing the general picture motion though
     % estimateGeometricTransform
-    ptsOriginal  = detectSURFFeatures(img1, 'ROI', ROI);
-    ptsShifted = detectSURFFeatures(img2, 'ROI', ROI);
+    ptsOriginal  = detectHarrisFeatures(img1); %detectSURFFeatures(img1, 'ROI', ROI);
+    ptsShifted = detectHarrisFeatures(img2); %detectSURFFeatures(img2, 'ROI', ROI);
     
     % returns extracted feature vectors, and their corresponding locations, from an image.
     [featuresOriginal,validPtsOriginal] = extractFeatures(img1,ptsOriginal);
@@ -37,9 +35,6 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     matchedPtsOriginal  = validPtsOriginal(index_pairs(:,1));
     matchedPtsDistorted = validPtsDistorted(index_pairs(:,2));
     
-    disp(size(matchedPtsOriginal));
-    disp(size(matchedPtsDistorted));
-    
     % getting the general geometric transformation of the image
     [tform, ~] = estimateGeometricTransform(matchedPtsDistorted, matchedPtsOriginal, 'affine');
     
@@ -49,8 +44,8 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     WarpedMask = imwarp(Mask, tform, 'OutputView', outputView);
     WarpedMaskOutline = bwperim(WarpedMask,4);
     
-    WarpedLocalWindows = zeroes(len(Windows),2);
-    for window = 1:len(Windows)
+    WarpedLocalWindows = zeros(length(Windows),2);
+    for window = 1:length(Windows)
         u = Windows(window,1);
 		v = Windows(window,2);
 		[x, y] = transformPointsForward(tform,u,v);
