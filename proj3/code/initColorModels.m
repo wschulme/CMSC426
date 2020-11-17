@@ -80,11 +80,11 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         ColorModels(window).gmm_b = gmm_b;
         ColorModels(window).prob = prob;
         ColorModels(window).dist = d_x;
+        
         %disp("Prob size (reshaped): " + size(ColorModels(window).prob));
 
         %% Calculate Color Model Confidence
         
-        %No clue what I did from here on
         top = 0;
         bot = 0;
         
