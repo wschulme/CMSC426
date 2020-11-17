@@ -43,14 +43,17 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     WarpedFrame = imwarp(IMG2, tform, 'OutputView', outputView);
     WarpedMask = imwarp(Mask, tform, 'OutputView', outputView);
     WarpedMaskOutline = bwperim(WarpedMask,4);
-    
-    WarpedLocalWindows = zeros(length(Windows),2);
+
+    WarpedLocalWindows = zeros(size(Windows));
     for window = 1:length(Windows)
-        u = Windows(window,1);
-		v = Windows(window,2);
+        u = Windows(window,2);
+		v = Windows(window,1);
+        
 		[x, y] = transformPointsForward(tform,u,v);
-		WarpedLocalWindows(window,1) = x;
-		WarpedLocalWindows(window,2) = y;
+        
+        WarpedLocalWindows(window,1) = round(x);
+        WarpedLocalWindows(window,2) = round(y);
+        
     end
 end
 
