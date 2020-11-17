@@ -14,9 +14,9 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     imshow(Mask);
     for window = 1:length(LocalWindows)
         %% Gather Pixels
-        %Get the x,y coordinate of this window
-        x_w = LocalWindows(window, 1);
-        y_w = LocalWindows(window, 2);
+        %Get the (middle) x,y coordinate of this window
+        y_w = LocalWindows(window, 1);
+        x_w = LocalWindows(window, 2);
         
         foreground = [];
         background = [];
