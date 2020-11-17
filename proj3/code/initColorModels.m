@@ -8,17 +8,11 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     NUM_GAUSS = 3;
     IMG = rgb2lab(IMG);
     
-    %% Select Foreground and Background
+    dx_init = bwdist(MaskOutline);
     
-    % We select the parts of the foreground and background who are greater
-    % than BoundaryWidth in distance from the outline to avoid sampling
-    % error.
-    fore_mask = bwdist(MaskOutline)>BoundaryWidth & Mask;
-    back_mask = bwdist(MaskOutline)>BoundaryWidth & ~Mask;
-    
-    %Just a visualization for the above.
+    %Just a visualization for the mask (fore/back).
     figure
-    imshow(fore_mask | back_mask);
+    imshow(Mask);
     
     for window = 1:length(LocalWindows)
         %% Gather Pixels
@@ -28,34 +22,40 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         
         foreground = [];
         background = [];
+        middle = [(y_w + SIGMA_C) (x_w + SIGMA_C)];
         
         %We draw this window with the x and y coordinates as the center.
         %NOTE: SIGMA_C is equal to WindowWidth/2. I just used this to save
         %space.
-        Win = (IMG((y_w - SIGMA_C):(y_w + SIGMA_C),(x_w - SIGMA_C):(x_w + SIGMA_C),:));
+        Win = (IMG((middle(1) - SIGMA_C):(middle(1) + SIGMA_C), ...
+            (middle(2) - SIGMA_C):(middle(2) + SIGMA_C),:));
         
-        %Iterate over the window.
-        for x = x_w - SIGMA_C: x_w + SIGMA_C
-            for y = y_w - SIGMA_C: y_w + SIGMA_C
+        Win_mask = Mask((middle(1) - SIGMA_C):(middle(1) + SIGMA_C), ...
+            (middle(2) - SIGMA_C):(middle(2) + SIGMA_C),:);
+        
+        d_x = dx_init((middle(1) - SIGMA_C):(middle(1) + SIGMA_C), ...
+            (middle(2) - SIGMA_C):(middle(2) + SIGMA_C));
+       
+        %Iterate over the window (Win)._
+        for x = 1:size(Win,1)
+            for y = 1:size(Win,2)
                 %Get the pixel values.
                 pixel = impixel(IMG, x, y);
                 
-                %LMFAO I have no idea why I need to invert these values but
-                %I do.
-                
                 %Append the channel values to their appropriate
                 %classification.
-                if fore_mask(y, x) == 1
+                if Win_mask(x, y) == 1 && d_x(x,y) > BoundaryWidth
                     foreground = vertcat(foreground, pixel);
-                elseif back_mask(y, x) == 1
+                elseif Win_mask(x, y) == 0 && d_x(x,y) > BoundaryWidth
+                    disp("works?");
                     background = vertcat(background, pixel);
                 end
             end
         end
         
         %Should be a reasonable value given the window
-        disp(size(foreground));
-        disp(size(background));
+        disp("foreground size: " + size(foreground));
+        disp("background size: " + size(background));
         
         %% Compute GMM
         
@@ -74,23 +74,34 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         %background.
         likelihood_f = pdf(gmm_f,window_channels);
         likelihood_b = pdf(gmm_b,window_channels);
+        prob = likelihood_f./(likelihood_f+likelihood_b);
+        %Reshape prob matrix to use it in final equation as row x col
+        %instead of n x 1
+        prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);
         
         %Add these to the struct in case that helps later.
         ColorModels(window).gmm_f = gmm_f;
         ColorModels(window).gmm_b = gmm_b;
-        ColorModels(window).prob = likelihood_f./(likelihood_f+likelihood_b);
+        ColorModels(window).prob = prob;
+        ColorModels(window).dist = d_x;
+        disp("Prob size (reshaped): " + size(ColorModels(window).prob));
 
         %% Calculate Color Model Confidence
         
         %No clue what I did from here on
-        L_t = foreground;
+        top = 0;
+        bot = 0;
         
-        %This shit doesn't work
-        d = reshape(bwdist(MaskOutline(Win)),[], 1);
+        for row = 1:size(Win, 1)
+            for col = 1:size(Win, 2)
+                d = exp(-d_x(row,col)^2 / (SIGMA_C^2));
+                top = top + (abs(Win(row,col) - ColorModels(window).prob(row,col)) * d);
+                bot = bot + d;
+            end
+        end
+        confidence = 1 - (top/bot);
         
-        %These formulae are right though I think
-        w_c = exp(-d.^2/SIGMA_C^2);
-        ColorModels(window).Confidences = 1 - sum( abs(L_t-ColorModels(win).prob).*w_c )/sum(w_c);
+        ColorModels(window).Confidences = confidence;
     end
 end
 
