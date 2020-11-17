@@ -13,7 +13,6 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     %Just a visualization for the mask (fore/back).
     figure
     imshow(Mask);
-    
     for window = 1:length(LocalWindows)
         %% Gather Pixels
         %Get the x,y coordinate of this window
@@ -36,18 +35,18 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         d_x = dx_init((middle(1) - SIGMA_C):(middle(1) + SIGMA_C), ...
             (middle(2) - SIGMA_C):(middle(2) + SIGMA_C));
        
-        %Iterate over the window (Win)._
+        %Iterate over the window (Win).
         for x = 1:size(Win,1)
             for y = 1:size(Win,2)
                 %Get the pixel values.
-                pixel = impixel(IMG, x, y);
+                pixel = impixel(Win, x, y);
+                disp(pixel);
                 
                 %Append the channel values to their appropriate
                 %classification.
-                if Win_mask(x, y) == 1 && d_x(x,y) > BoundaryWidth
+                if Win_mask(x, y) == 1 && d_x(x,y) < BoundaryWidth
                     foreground = vertcat(foreground, pixel);
-                elseif Win_mask(x, y) == 0 && d_x(x,y) > BoundaryWidth
-                    disp("works?");
+                elseif Win_mask(x, y) == 0 && d_x(x,y) < BoundaryWidth
                     background = vertcat(background, pixel);
                 end
             end
