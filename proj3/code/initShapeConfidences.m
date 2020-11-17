@@ -1,6 +1,5 @@
-function ShapeConfidences = initShapeConfidences(LocalWindows, ColorConfidences, WindowWidth, SigmaMin, A, fcutoff, R)
+function ShapeConfidences = initShapeConfidences(LocalWindows, ColorModels, WindowWidth, SigmaMin, A, fcutoff, R)
 % INITSHAPECONFIDENCES Initialize shape confidences.  ShapeConfidences is a struct you should define yourself.
-    
     for window = 1:length(LocalWindows)
         % Grab all ColorModels
         colorconf = ColorModels(window).Confidences;
@@ -8,7 +7,7 @@ function ShapeConfidences = initShapeConfidences(LocalWindows, ColorConfidences,
         y = LocalWindows(window, 1);
         x = LocalWindows(window, 2);
         
-        % Grab all ColorModels
+        % c, d, sigma
         confidence = colorconf(x,y);
         d = colordist(x,y);
         sigma = SigmaMin;
@@ -18,9 +17,9 @@ function ShapeConfidences = initShapeConfidences(LocalWindows, ColorConfidences,
         end
         
         fsx = 1 - exp(-(d.^2) ./ sigma.^2);
+        
+        ShapeConfidences(window).Confidences = fsx;
+        ShapeConfidences(window).Sigma = sigma;
     end
-    
-    ShapeConfidences.Confidences = fsx;
-    ShapeConfidences.Sigma = sigma;
     
 end

@@ -2,6 +2,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
 % INITIALIZAECOLORMODELS Initialize color models.  ColorModels is a struct you should define yourself.
 %
 % Must define a field ColorModels.Confidences: a cell array of the color confidence map for each local window.
+    
     %% Variables
     SIGMA_C = WindowWidth/2;
     REG = .001;
@@ -50,8 +51,8 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         end
         
         %Should be a reasonable value given the window
-        disp("foreground size: " + size(foreground));
-        disp("background size: " + size(background));
+        %disp("foreground size: " + size(foreground));
+        %disp("background size: " + size(background));
         
         %% Compute GMM
         
