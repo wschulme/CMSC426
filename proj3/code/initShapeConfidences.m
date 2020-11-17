@@ -3,13 +3,14 @@ function ShapeConfidences = initShapeConfidences(LocalWindows, ColorModels, Wind
     for window = 1:length(LocalWindows)
         % Grab all ColorModels
         colorconf = ColorModels(window).Confidences;
+        disp(size(colorconf));
         colordist = ColorModels(window).dist;
         y = LocalWindows(window, 1);
         x = LocalWindows(window, 2);
         
         % c, d, sigma
-        confidence = colorconf(x,y);
-        d = colordist(x,y);
+        confidence = colorconf;
+        d = colordist;
         sigma = SigmaMin;
         
         if confidence > fcutoff
