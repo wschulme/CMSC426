@@ -101,7 +101,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         
         confidence_arr{window} = confidence;
     end
-    disp(size(confidence_arr));
+    
     ColorModels(length(LocalWindows)+1).Confidences = confidence_arr;
 end
 
