@@ -71,7 +71,10 @@ set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
 
-showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows,WindowWidth);
+% CHANGED!!!!
+% THIRD ARGUMENT OG: ColorModels.Confidences 
+% --> ColorModels(length(LocalWindows)+1).Confidences
+showColorConfidences(images{1},mask_outline,ColorModels(length(LocalWindows)+1).Confidences,LocalWindows,WindowWidth);
 
 %%% MAIN LOOP %%%
 % Process each frame in the video.

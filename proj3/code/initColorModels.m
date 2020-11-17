@@ -9,6 +9,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     NUM_GAUSS = 3;
     IMG = rgb2lab(IMG);
     dx_init = bwdist(MaskOutline);
+    confidence_arr = {};
     
     %Just a visualization for the mask (fore/back).
     figure
@@ -98,7 +99,9 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         end
         confidence = 1 - (top/bot);
         
-        ColorModels(window).Confidences = confidence;
+        confidence_arr{window} = confidence;
     end
+    disp(size(confidence_arr));
+    ColorModels(length(LocalWindows)+1).Confidences = confidence_arr;
 end
 
