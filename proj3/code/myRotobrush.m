@@ -74,7 +74,7 @@ F = getframe(gcf);
 % CHANGED!!!!
 % THIRD ARGUMENT OG: ColorModels.Confidences 
 % --> ColorModels(length(LocalWindows)+1).Confidences
-showColorConfidences(images{1},mask_outline,ColorModels(length(LocalWindows)+1).Confidences,LocalWindows,WindowWidth);
+showColorConfidences(images{1},mask_outline,ColorModels{length(LocalWindows)+1}.Confidences,LocalWindows,WindowWidth);
 
 %%% MAIN LOOP %%%
 % Process each frame in the video.

@@ -61,7 +61,6 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         %took NUM_GAUSS to be 3 because the turtle picture has like no colors. 
         gmm_f = fitgmdist(foreground, NUM_GAUSS, 'RegularizationValue', REG);
         gmm_b = fitgmdist(background, NUM_GAUSS, 'RegularizationValue', REG);
-
         %% Apply Model
         
         %Gather all the channels in the window
@@ -78,10 +77,11 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);
         
         %Add these to the struct in case that helps later.
-        ColorModels(window).gmm_f = gmm_f;
-        ColorModels(window).gmm_b = gmm_b;
-        ColorModels(window).prob = prob;
-        ColorModels(window).dist = d_x;
+        ColorModels{window}.gmm_f = gmm_f;
+        ColorModels{window}.gmm_b = gmm_b;
+        ColorModels{window}.prob = prob;
+        ColorModels{window}.dist = d_x;
+        ColorModels{window}.foreground = length(foreground);
         
         %disp("Prob size (reshaped): " + size(ColorModels(window).prob));
 
@@ -93,7 +93,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         for row = 1:size(Win, 1)
             for col = 1:size(Win, 2)
                 d = exp(-d_x(row,col)^2 / (SIGMA_C^2));
-                top = top + (abs(Win(row,col) - ColorModels(window).prob(row,col)) * d);
+                top = top + (abs(Win(row,col) - ColorModels{window}.prob(row,col)) * d);
                 bot = bot + d;
             end
         end
@@ -102,6 +102,6 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         confidence_arr{window} = confidence;
     end
     
-    ColorModels(length(LocalWindows)+1).Confidences = confidence_arr;
+    ColorModels{length(LocalWindows)+1}.Confidences = confidence_arr;
 end
 
