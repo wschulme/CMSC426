@@ -81,7 +81,8 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         ColorModels{window}.gmm_b = gmm_b;
         ColorModels{window}.prob = prob;
         ColorModels{window}.dist = d_x;
-        ColorModels{window}.foreground = length(foreground);
+        ColorModels{window}.foreground = foreground;
+        ColorModels{window}.background = background;
         
         %disp("Prob size (reshaped): " + size(ColorModels(window).prob));
 
