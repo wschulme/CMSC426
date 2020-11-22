@@ -73,6 +73,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 likelihood_f = pdf(previous_gmm_f, pixel);
                 likelihood_b = pdf(previous_gmm_b, pixel);
                 prob = likelihood_f./(likelihood_f+likelihood_b);
+                
                 if prob > .75 
                     vertcat(new_foreground, pixel);
                     old_num_f = old_num_f + 1;
@@ -99,9 +100,22 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 end
             end
         end
-        disp(new_num_f);
-        disp('hello');
-        disp(old_num_f);
+        
+        if (new_num_f <= old_num_f)
+            ColorModels{window}.gmm_f = gmm_f;
+            ColorModels{window}.gmm_b = gmm_b;
+            ColorModels{window}.foreground = new_foreground;
+            ColorModels{window}.background = new_background;
+            [r, c, ~] = size(Win);
+            window_channels = reshape(double(Win),[r*c 3]);
+            likelihood_f = pdf(new_gmm_f,window_channels);
+            likelihood_b = pdf(new_gmm_b,window_channels);
+            prob = likelihood_f./(likelihood_f+likelihood_b);
+            prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);
+            ColorModels{window}.prob = prob;
+            d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
+            ColorModels{window}.d_x = d_x;
+        end
         
     end
     
