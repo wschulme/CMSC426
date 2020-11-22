@@ -21,19 +21,17 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     REG = .001;
     NUM_GAUSS = 3;
     IMG = rgb2lab(CurrentFrame);
-  
+    [x1,y1,z1] = size(IMG);
+    
     %Just a visualization for the mask (fore/back).
     imshow(warpedMask);
 
-    %new_shape_confidences = ...
-        %initShapeConfidences(NewLocalWindows, warpedMaskOutline, WindowWidth, SigmaMin, A, fcutoff, R);
+    update_shape_confidences = ...
+        initShapeConfidences(NewLocalWindows, ColorModels, WindowWidth, SigmaMin, A, fcutoff, R);
 
     for window = 1:length(NewLocalWindows)
         y_w = NewLocalWindows(window, 1);
         x_w = NewLocalWindows(window, 2);
-        
-        Win = (IMG((x_w - SIGMA_C):(x_w + SIGMA_C), ...
-            (y_w - SIGMA_C):(y_w + SIGMA_C),:));
         
         previous_gmm_f = fitgmdist(ColorModels{window}.foreground, NUM_GAUSS, 'RegularizationValue', REG);
         previous_gmm_b = fitgmdist(ColorModels{window}.background, NUM_GAUSS, 'RegularizationValue', REG);
@@ -47,17 +45,33 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         new_foreground = ColorModels{window}.foreground;
         new_background = ColorModels{window}.background;
+        
+        win_lower_x = x_w - SIGMA_C + 1;
+        win_upper_x = x_w - SIGMA_C + WindowWidth;
+        win_lower_y = y_w - SIGMA_C + 1;
+        win_upper_y = y_w - SIGMA_C + WindowWidth;
+        if win_upper_x > x1
+            win_upper_x = x1;
+        end
+        if win_upper_y > y1
+            win_upper_y = y1;
+        end
+        Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
+        
+
         %Iterate over the window (Win).
-        for x = (x_w - SIGMA_C):(x_w + SIGMA_C)
-            for y = (y_w - SIGMA_C):(y_w + SIGMA_C)
-                pixel = impixel(Win, x, y);
-                [r, c, ~] = size(Win);
-                window_channels = reshape(double(Win),[r*c 3]);
+        for x = 1:size(Win,1)
+            for y = 1:size(Win,2)
+                x_img = floor(x_w - SIGMA_C + x);
+                y_img = floor(y_w - SIGMA_C + y);
+                pixel = impixel(IMG, x_img, y_img);
+                %[r, c, ~] = size(Win);
+                %window_channels = reshape(double(Win),[r*c 3])
                 %Calculate the likelihoods that all the pixels are foreground or
                 %background.
                 
-                likelihood_f = pdf(previous_gmm_f,window_channels);
-                likelihood_b = pdf(previous_gmm_b,window_channels);
+                likelihood_f = previous_gmm_f.posterior(reshape(IMG(x_img, y_img,:), 1, 3));
+                likelihood_b = previous_gmm_b.posterior(reshape(IMG(x_img, y_img,:), 1, 3));
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 if prob > .75 
                     vertcat(new_foreground, pixel);
@@ -74,10 +88,11 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         for x = x_lower:x_upper
             for y = y_lower:y_upper
-                [r, c, ~] = size(Win);
-                window_channels = reshape(double(Win),[r*c 3]);
-                likelihood_f = pdf(new_gmm_f,window_channels);
-                likelihood_b = pdf(new_gmm_b,window_channels);
+                %[r, c, ~] = size(Win);
+                %window_channels = reshape(double(Win),[r*c 3]);
+                %pixel = impixel(IMG, x_img, y_img);
+                likelihood_f = previous_gmm_f.posterior(reshape(IMG(x, y,:), 1, 3));
+                likelihood_b = previous_gmm_b.posterior(reshape(IMG(x, y,:), 1, 3));
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 if prob > .75 
                     new_num_f = new_num_f + 1;
@@ -89,6 +104,5 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         disp(old_num_f);
         
     end
-    %new_shape_confidences = ...
-        %initShapeConfidences(NewLocalWindows, warpedMaskOutline, WindowWidth, SigmaMin, A, fcutoff, R);
+    
 end
