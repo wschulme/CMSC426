@@ -70,8 +70,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 %Calculate the likelihoods that all the pixels are foreground or
                 %background.
                 
-                likelihood_f = previous_gmm_f.posterior(reshape(IMG(x_img, y_img,:), 1, 3));
-                likelihood_b = previous_gmm_b.posterior(reshape(IMG(x_img, y_img,:), 1, 3));
+                likelihood_f = pdf(previous_gmm_f, pixel);
+                likelihood_b = pdf(previous_gmm_b, pixel);
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 if prob > .75 
                     vertcat(new_foreground, pixel);
@@ -90,9 +90,9 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             for y = y_lower:y_upper
                 %[r, c, ~] = size(Win);
                 %window_channels = reshape(double(Win),[r*c 3]);
-                %pixel = impixel(IMG, x_img, y_img);
-                likelihood_f = previous_gmm_f.posterior(reshape(IMG(x, y,:), 1, 3));
-                likelihood_b = previous_gmm_b.posterior(reshape(IMG(x, y,:), 1, 3));
+                pixel = impixel(IMG, x, y);
+                likelihood_f = pdf(new_gmm_f, pixel);
+                likelihood_b = pdf(new_gmm_b, pixel);
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 if prob > .75 
                     new_num_f = new_num_f + 1;
