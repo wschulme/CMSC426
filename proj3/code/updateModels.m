@@ -4,7 +4,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         LocalWindows, ...
         CurrentFrame, ...
         warpedMask, ...
-        warpedMaskOutline, ...
+        warpedMaskOutline, ... %L^t+1
         WindowWidth, ...
         ColorModels, ...
         ShapeConfidences, ...
@@ -38,10 +38,14 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         old_num_f = 0;
         new_num_f = 0;
-        x_lower = NewLocalWindows(window,1) - WindowWidth/2;
-        x_upper = NewLocalWindows(window,1) + WindowWidth/2;
-        y_lower = NewLocalWindows(window,2) - WindowWidth/2;
-        y_upper = NewLocalWindows(window,2) + WindowWidth/2;
+        x_lower = round(NewLocalWindows(window,1) - WindowWidth/2);
+        x_upper = round(NewLocalWindows(window,1) + WindowWidth/2);
+        y_lower = round(NewLocalWindows(window,2) - WindowWidth/2);
+        y_upper = round(NewLocalWindows(window,2) + WindowWidth/2);
+        
+        dist = bwdist(warpedMaskOutline);
+        dist = dist(y_lower:y_upper, x_lower:x_upper);
+        dist = -(dist).^2;
         
         new_foreground = ColorModels{window}.foreground;
         new_background = ColorModels{window}.background;
@@ -72,6 +76,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 
                 likelihood_f = pdf(previous_gmm_f, pixel);
                 likelihood_b = pdf(previous_gmm_b, pixel);
+                %foreground probability at specifix pixel
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 
                 if prob > .75 
@@ -102,21 +107,43 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         end
         
         if (new_num_f <= old_num_f)
-            ColorModels{window}.gmm_f = gmm_f;
-            ColorModels{window}.gmm_b = gmm_b;
+            ColorModels{window}.gmm_f = new_gmm_f;
+            ColorModels{window}.gmm_b = new_gmm_b;
             ColorModels{window}.foreground = new_foreground;
             ColorModels{window}.background = new_background;
             [r, c, ~] = size(Win);
             window_channels = reshape(double(Win),[r*c 3]);
             likelihood_f = pdf(new_gmm_f,window_channels);
             likelihood_b = pdf(new_gmm_b,window_channels);
-            prob = likelihood_f./(likelihood_f+likelihood_b);
+            prob = likelihood_f./(likelihood_f+likelihood_b)
+            
+            prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);
+            ColorModels{window}.prob = prob;
+            d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
+            ColorModels{window}.d_x = d_x;
+            for row = 1:size(Win, 1)
+                for col = 1:size(Win, 2)
+                    d = exp(-d_x(row,col)^2 / (SIGMA_C^2));
+                    top = top + (abs(Win(row,col) - ColorModels{window}.prob(row,col)) * d);
+                    bot = bot + d;
+                end
+            end
+            confidence = 1 - (top/bot);
+            confidence_arr{window} = confidence;
+        else
+            ColorModels{window}.foreground = new_foreground;
+            ColorModels{window}.background = new_background;
+            [r, c, ~] = size(Win);
+            window_channels = reshape(double(Win),[r*c 3]);
+            likelihood_f = pdf(previous_gmm_f,window_channels);
+            likelihood_b = pdf(previous_gmm_b,window_channels);
+            prob = likelihood_f./(likelihood_f+likelihood_b)
             prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);
             ColorModels{window}.prob = prob;
             d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
             ColorModels{window}.d_x = d_x;
         end
-        
+        ColorModels{length(NewLocalWindows)+1}.Confidences = confidence_arr;
     end
     
 end
