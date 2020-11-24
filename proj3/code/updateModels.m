@@ -22,12 +22,11 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     NUM_GAUSS = 3;
     IMG = rgb2lab(CurrentFrame);
     [x1,y1,z1] = size(IMG);
+    dx_init = bwdist(warpedMaskOutline);
     
     %Just a visualization for the mask (fore/back).
     imshow(warpedMask);
 
-    update_shape_confidences = ...
-        initShapeConfidences(NewLocalWindows, ColorModels, WindowWidth, SigmaMin, A, fcutoff, R);
 
     for window = 1:length(NewLocalWindows)
         y_w = NewLocalWindows(window, 1);
@@ -42,10 +41,22 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         x_upper = round(NewLocalWindows(window,1) + WindowWidth/2);
         y_lower = round(NewLocalWindows(window,2) - WindowWidth/2);
         y_upper = round(NewLocalWindows(window,2) + WindowWidth/2);
+        if x_lower > x1
+            x_lower = x1;
+        end
+        if x_upper > x1
+            x_upper = x1;
+        end
+        if y_lower > y1
+            y_lower = y1;
+        end
+        if y_upper > y1
+            y_upper = y1;
+        end
         
-        dist = bwdist(warpedMaskOutline);
-        dist = dist(y_lower:y_upper, x_lower:x_upper);
-        dist = -(dist).^2;
+        %dist = bwdist(warpedMaskOutline);
+        %dist = dist(y_lower:y_upper, x_lower:x_upper);
+        %dist = -(dist).^2;
         
         new_foreground = ColorModels{window}.foreground;
         new_background = ColorModels{window}.background;
@@ -115,12 +126,13 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             window_channels = reshape(double(Win),[r*c 3]);
             likelihood_f = pdf(new_gmm_f,window_channels);
             likelihood_b = pdf(new_gmm_b,window_channels);
-            prob = likelihood_f./(likelihood_f+likelihood_b)
-            
-            prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);
+            prob = likelihood_f./(likelihood_f+likelihood_b);
+            prob = reshape(prob, [WindowWidth WindowWidth]);
             ColorModels{window}.prob = prob;
             d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
             ColorModels{window}.d_x = d_x;
+            top = 0;
+            bot = 0;
             for row = 1:size(Win, 1)
                 for col = 1:size(Win, 2)
                     d = exp(-d_x(row,col)^2 / (SIGMA_C^2));
@@ -137,8 +149,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             window_channels = reshape(double(Win),[r*c 3]);
             likelihood_f = pdf(previous_gmm_f,window_channels);
             likelihood_b = pdf(previous_gmm_b,window_channels);
-            prob = likelihood_f./(likelihood_f+likelihood_b)
-            prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);
+            prob = likelihood_f./(likelihood_f+likelihood_b);
+            prob = reshape(prob, [WindowWidth WindowWidth]);
             ColorModels{window}.prob = prob;
             d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
             ColorModels{window}.d_x = d_x;
@@ -146,4 +158,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         ColorModels{length(NewLocalWindows)+1}.Confidences = confidence_arr;
     end
     
+    update_shape_confidences = ...
+        initShapeConfidences(NewLocalWindows, ColorModels, WindowWidth, SigmaMin, A, fcutoff, R);
 end
