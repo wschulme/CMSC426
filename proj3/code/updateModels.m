@@ -27,7 +27,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     %Just a visualization for the mask (fore/back).
     imshow(warpedMask);
 
-
+    
     for window = 1:length(NewLocalWindows)
         y_w = NewLocalWindows(window, 1);
         x_w = NewLocalWindows(window, 2);
@@ -37,18 +37,21 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         old_num_f = 0;
         new_num_f = 0;
+        
+        %get the center of the window +/- WindowWidth/2 to get the upper
+        %and lower bound of the window
         x_lower = round(NewLocalWindows(window,1) - WindowWidth/2);
         x_upper = round(NewLocalWindows(window,1) + WindowWidth/2);
         y_lower = round(NewLocalWindows(window,2) - WindowWidth/2);
         y_upper = round(NewLocalWindows(window,2) + WindowWidth/2);
-        if x_lower > x1
-            x_lower = x1;
+        if x_lower < 1
+            x_lower = 1;
         end
         if x_upper > x1
             x_upper = x1;
         end
-        if y_lower > y1
-            y_lower = y1;
+        if y_lower < 1
+            y_lower = 1;
         end
         if y_upper > y1
             y_upper = y1;
@@ -61,20 +64,35 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         new_foreground = ColorModels{window}.foreground;
         new_background = ColorModels{window}.background;
         
+        %get the center of the window +/- WindowWidth/2 to get the upper
+        %and lower bound of the window so we can iterate over each pixel in
+        %window to get the number of foreground pixels
         win_lower_x = x_w - SIGMA_C + 1;
         win_upper_x = x_w - SIGMA_C + WindowWidth;
         win_lower_y = y_w - SIGMA_C + 1;
         win_upper_y = y_w - SIGMA_C + WindowWidth;
+        if win_lower_x < 1
+            win_lower_x = 1;
+        end
         if win_upper_x > x1
             win_upper_x = x1;
+        end
+        if win_lower_y < 1
+            win_lower_y_ = 1;
         end
         if win_upper_y > y1
             win_upper_y = y1;
         end
-        Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         
+        WindowWidthX = abs(round(win_upper_x - win_lower_x));
+        WindowWidthY = abs(round(win_upper_y - win_lower_y));
+        
+        Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
+        disp('touched win\n');
+        disp(size(Win));
 
-        %Iterate over the window (Win).
+        %Iterate over the window (Win). and finding foreground pixels using
+        %old gmm
         for x = 1:size(Win,1)
             for y = 1:size(Win,2)
                 x_img = floor(x_w - SIGMA_C + x);
@@ -82,7 +100,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 pixel = impixel(IMG, x_img, y_img);
                 %[r, c, ~] = size(Win);
                 %window_channels = reshape(double(Win),[r*c 3])
-                %Calculate the likelihoods that all the pixels are foreground or
+                %Calculate the likelihoo      ds that all the pixels are foreground or
                 %background.
                 
                 likelihood_f = pdf(previous_gmm_f, pixel);
@@ -100,6 +118,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
         end
         
+        %so we can find the foreground pixels using the new gmm
         new_gmm_f = fitgmdist(new_foreground, NUM_GAUSS, 'RegularizationValue', REG);
         new_gmm_b = fitgmdist(new_background, NUM_GAUSS, 'RegularizationValue', REG);
         
@@ -117,6 +136,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
         end
         
+        %update color model if more foreground pixels
         if (new_num_f <= old_num_f)
             ColorModels{window}.gmm_f = new_gmm_f;
             ColorModels{window}.gmm_b = new_gmm_b;
@@ -130,7 +150,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             prob = reshape(prob, [WindowWidth WindowWidth]);
             ColorModels{window}.prob = prob;
             d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
-            ColorModels{window}.d_x = d_x;
+            ColorModels{window}.dist = d_x;
             top = 0;
             bot = 0;
             for row = 1:size(Win, 1)
@@ -150,14 +170,45 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             likelihood_f = pdf(previous_gmm_f,window_channels);
             likelihood_b = pdf(previous_gmm_b,window_channels);
             prob = likelihood_f./(likelihood_f+likelihood_b);
-            prob = reshape(prob, [WindowWidth WindowWidth]);
+            disp(size(Win))
+            disp(size(prob));
+            a = (size(Win))(1);
+            prob = reshape(prob, [(size(Win))(1) (size(win))(2)]);
             ColorModels{window}.prob = prob;
             d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
-            ColorModels{window}.d_x = d_x;
+            ColorModels{window}.dist = d_x;
         end
         ColorModels{length(NewLocalWindows)+1}.Confidences = confidence_arr;
     end
     
-    update_shape_confidences = ...
+    ShapeConfidences = ...
         initShapeConfidences(NewLocalWindows, ColorModels, WindowWidth, SigmaMin, A, fcutoff, R);
+    
+    colorconf = ColorModels{length(LocalWindows)+1}.Confidences;
+    
+    %update shape confidence, almost exactly like initShapeConfidences
+    %except I have a newSigma that I use if the color confidence is
+    %reliable.
+    for window = 1:length(NewLocalWindows)
+        colordist = ColorModels{window}.dist;
+        
+        % c, d, sigma
+        d = colordist;
+        
+        NewSigma = SigmaMin + (A * (colorconf{window} - fcutoff)^R);
+        
+        %if colormodel is less than 50% confident move onto using the shape
+        %model, otherwise just continue to use sigmaMin
+        if (colorconf{window} < .5)
+            fsx = 1 - exp(-(d.^2) ./ SigmaMin.^2);
+            ShapeConfidences{window}.Sigma = SigmaMin;
+        else
+            fsx = 1 - exp(-(d.^2) ./ NewSigma.^2);
+            ShapeConfidences{window}.Sigma = NewSigma;
+        end
+        
+        ShapeConfidences{window}.Confidences = fsx;
+        
+    end
 end
+
