@@ -88,8 +88,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         WindowWidthY = abs(round(win_upper_y - win_lower_y));
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
-        disp('touched win\n');
-        disp(size(Win));
 
         %Iterate over the window (Win). and finding foreground pixels using
         %old gmm
@@ -172,8 +170,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             prob = likelihood_f./(likelihood_f+likelihood_b);
             disp(size(Win))
             disp(size(prob));
-            a = (size(Win))(1);
-            prob = reshape(prob, [(size(Win))(1) (size(win))(2)]);
+            prob = reshape(prob, [WindowWidth WindowWidth]);
             ColorModels{window}.prob = prob;
             d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
             ColorModels{window}.dist = d_x;
