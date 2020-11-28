@@ -21,7 +21,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     REG = .001;
     NUM_GAUSS = 3;
     IMG = rgb2lab(CurrentFrame);
-    [x1,y1,z1] = size(IMG);
+    [x1,y1,z1] = size(IMG); %dimensions of the image
     dx_init = bwdist(warpedMaskOutline);
     
     %Just a visualization for the mask (fore/back).
@@ -75,7 +75,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             win_upper_x = x1;
         end
         if win_lower_y < 1
-            win_lower_y_ = 1;
+            win_lower_x = 1;
         end
         if win_upper_y > y1
             win_upper_y = y1;
