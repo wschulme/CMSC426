@@ -157,7 +157,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
             confidence = 1 - (top/bot);
             confidence_arr{window} = confidence;
-            mask = roipoly(CurrentFrame);
         else
             ColorModels{window}.foreground = new_foreground;
             ColorModels{window}.background = new_background;
@@ -205,6 +204,35 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         ShapeConfidences{window}.Confidences = fsx;
     end
+    
+    numer_sum = zeros([x1 y1]);
+    denom_sum = zeros([x1 y1]);
+    % merging the windows
+    for window = 1:length(NewLocalWindows)
+        y_w = NewLocalWindows(window, 1);
+        x_w = NewLocalWindows(window, 2);
+        
+        % basically just the formula
+        fsx = ShapeConfidences{window}.Confidences;
+        pkfx = fsx .* warpedMask{window} + (1 - fsx).* ColorModels{window}.prob;
+        epsilon = .1;
+        
+        Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
+
+        %Iterate over the window (Win). and finding foreground pixels using
+        %old gmm
+        for x = 1:size(Win,1)
+            for y = 1:size(Win,2)
+                x_img = floor(x_w - SIGMA_C + x);
+                y_img = floor(y_w - SIGMA_C + y);
+                distance_to_center = sqrt((x_img - y_w)^2 + (y_img - x_w)^2);
+                numer_sum(x_img, y_img) = numer_sum(x_img, y_img) + pkfx * (distance_to_center + epsilon)^-1;
+                denom_sum(x_img, y_img) = denom_sum(x_img, y_img) + (distance_to_center + epsilon)^-1;
+                
+            end
+        end
+    end
+    
+    pfx = numer_sum./denom_sum;
     LocalWindows = NewLocalWindows;
 end
-
