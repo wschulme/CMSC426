@@ -3,8 +3,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         NewLocalWindows, ...
         LocalWindows, ...
         CurrentFrame, ...
-        warpedMask, ...
-        warpedMaskOutline, ... %L^t+1
+        warpedMask, ...      %L^t+1
+        warpedMaskOutline, ... 
         WindowWidth, ...
         ColorModels, ...
         ShapeConfidences, ...
@@ -57,9 +57,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             y_upper = y1;
         end
         
-        %dist = bwdist(warpedMaskOutline);
-        %dist = dist(y_lower:y_upper, x_lower:x_upper);
-        %dist = -(dist).^2;
         
         new_foreground = ColorModels{window}.foreground;
         new_background = ColorModels{window}.background;
@@ -160,6 +157,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
             confidence = 1 - (top/bot);
             confidence_arr{window} = confidence;
+            mask = roipoly(CurrentFrame);
         else
             ColorModels{window}.foreground = new_foreground;
             ColorModels{window}.background = new_background;
@@ -196,6 +194,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         %if colormodel is less than 50% confident move onto using the shape
         %model, otherwise just continue to use sigmaMin
+        %should this be .5 or fcutoff not sure
         if (colorconf{window} < .5)
             fsx = 1 - exp(-(d.^2) ./ SigmaMin.^2);
             ShapeConfidences{window}.Sigma = SigmaMin;
@@ -205,7 +204,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         end
         
         ShapeConfidences{window}.Confidences = fsx;
-        
     end
+    LocalWindows = NewLocalWindows;
 end
 
