@@ -12,7 +12,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         fcutoff, ...
         SigmaMin, ...
         R, ...
-        A ...
+        A, ...
+        BoundaryWidth ...
     )
 % UPDATEMODELS: update shape and color models, and apply the result to generate a new mask.
 % Feel free to redefine this as several different functions if you prefer.
@@ -59,9 +60,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             y_upper = y1;
         end
         
-        
-        new_foreground = ColorModels{window}.foreground;
-        new_background = ColorModels{window}.background;
+        new_foreground = [];
+        new_background = [];
         
         %get the center of the window +/- WindowWidth/2 to get the upper
         %and lower bound of the window so we can iterate over each pixel in
@@ -77,7 +77,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             win_upper_x = x1;
         end
         if win_lower_y < 1
-            win_lower_x = 1;
+            win_lower_y = 1;
         end
         if win_upper_y > y1
             win_upper_y = y1;
@@ -87,6 +87,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         WindowWidthY = abs(round(win_upper_y - win_lower_y));
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
+        Win_mask = (warpedMask(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
+        d_x = (dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         
         %Iterate over the window (Win). and finding foreground pixels using
         %old gmm
@@ -97,7 +99,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 pixel = impixel(IMG, x_img, y_img);
                 %[r, c, ~] = size(Win);
                 %window_channels = reshape(double(Win),[r*c 3])
-                %Calculate the likelihoo      ds that all the pixels are foreground or
+                %Calculate the likelihoods that all the pixels are foreground or
                 %background.
                 
                 likelihood_f = pdf(previous_gmm_f, pixel);
@@ -106,17 +108,30 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 
                 if prob > upper_thresh 
+                    % && Win_mask(x_img, y_img) == 0 && d_x(x_img, y_img) > BoundaryWidth
                     vertcat(new_foreground, pixel);
                     old_num_f = old_num_f + 1;
-                else if prob > lower_thresh
+                elseif prob > lower_thresh
+                    % && Win_mask(x_img, y_img) == 0 && d_x(x_img, y_img) > BoundaryWidth
                     vertcat(new_background, pixel);
                 end
             end
         end
         
         %so we can find the foreground pixels using the new gmm
-        new_gmm_f = fitgmdist(new_foreground, NUM_GAUSS, 'RegularizationValue', REG);
-        new_gmm_b = fitgmdist(new_background, NUM_GAUSS, 'RegularizationValue', REG);
+        [f_r, f_c] = size(new_foreground);
+        [b_r, b_c] = size(new_foreground);
+        if (f_r > f_c)
+            new_gmm_f = fitgmdist(new_foreground, NUM_GAUSS, 'RegularizationValue', REG);
+        else
+            new_gmm_f = previous_gmm_f;
+        end
+        
+        if (b_r > b_c)
+            new_gmm_b = fitgmdist(new_background, NUM_GAUSS, 'RegularizationValue', REG);
+        else
+            new_gmm_b = previous_gmm_b;
+        end
         
         for x = x_lower:x_upper
             for y = y_lower:y_upper
@@ -127,6 +142,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 likelihood_b = pdf(new_gmm_b, pixel);
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 if prob > upper_thresh
+                    % && Win_mask(x_img, y_img) == 1 && d_x(x_img, y_img) > BoundaryWidth
                     new_num_f = new_num_f + 1;
                 end
             end
@@ -236,7 +252,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 distance_to_center = sqrt((x_img - y_w)^2 + (y_img - x_w)^2);
                 numer_sum(x_img, y_img) = numer_sum(x_img, y_img) + pkfx * (distance_to_center + epsilon)^-1;
                 denom_sum(x_img, y_img) = denom_sum(x_img, y_img) + (distance_to_center + epsilon)^-1;
-                
             end
         end
     end
@@ -244,5 +259,5 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     pfx = numer_sum./denom_sum;
     LocalWindows = NewLocalWindows;
     % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
-    mask = (mask > ProbMaskThreshold);
+    mask = (pfx > ProbMaskThreshold);
 end
