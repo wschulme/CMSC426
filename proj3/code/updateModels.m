@@ -120,7 +120,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         %so we can find the foreground pixels using the new gmm
         [f_r, f_c] = size(new_foreground);
-        [b_r, b_c] = size(new_foreground);
+        [b_r, b_c] = size(new_background);
         if (f_r > f_c)
             new_gmm_f = fitgmdist(new_foreground, NUM_GAUSS, 'RegularizationValue', REG);
         else
@@ -142,7 +142,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 likelihood_b = pdf(new_gmm_b, pixel);
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 if prob > upper_thresh
-                    % && Win_mask(x_img, y_img) == 1 && d_x(x_img, y_img) > BoundaryWidth
+                    % && Win_mask(x_img, y_img) == 1 && d_x(x, y) > BoundaryWidth
                     new_num_f = new_num_f + 1;
                 end
             end
