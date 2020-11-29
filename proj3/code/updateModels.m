@@ -245,4 +245,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     
     pfx = numer_sum./denom_sum;
     LocalWindows = NewLocalWindows;
+    % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
+    mask = (mask > ProbMaskThreshold);
 end
