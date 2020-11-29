@@ -118,9 +118,10 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
         end
         
-        %so we can find the foreground pixels using the new gmm
+        % can't find gmm when there are less rows than columns
         [f_r, f_c] = size(new_foreground);
         [b_r, b_c] = size(new_background);
+        
         if (f_r > f_c)
             new_gmm_f = fitgmdist(new_foreground, NUM_GAUSS, 'RegularizationValue', REG);
         else
@@ -133,6 +134,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             new_gmm_b = previous_gmm_b;
         end
         
+        %so we can find the foreground pixels using the new gmm
         for x = x_lower:x_upper
             for y = y_lower:y_upper
                 %[r, c, ~] = size(Win);
