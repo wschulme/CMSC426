@@ -18,8 +18,6 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     img2 = rgb2gray(IMG2);
     img2 = img2(min_x-error:max_x+error, min_y-error:max_y+error);
     
-    %[x y width height]
-    %ROI = [1 1 max_x-min_x max_y-min_y];
     
     % Getting the features for analyizing the general picture motion though
     % estimateGeometricTransform
@@ -35,24 +33,27 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     matchedPtsOriginal  = validPtsOriginal(index_pairs(:,1));
     matchedPtsDistorted = validPtsDistorted(index_pairs(:,2));
     
+    figure 
+    showMatchedFeatures(img1,img2,matchedPtsOriginal,matchedPtsDistorted)
+    
     % getting the general geometric transformation of the image
-    [tform, ~] = estimateGeometricTransform(matchedPtsDistorted, matchedPtsOriginal, 'affine');
+    [tform, ~] = estimateGeometricTransform(matchedPtsOriginal, matchedPtsDistorted, 'affine');
     
-    outputView = imref2d(size(IMG1));
+    outputView = imref2d(size(IMG2));
     
-    WarpedFrame = imwarp(IMG2, tform, 'OutputView', outputView);
+    WarpedFrame = imwarp(IMG1, tform, 'OutputView', outputView);
     WarpedMask = imwarp(Mask, tform, 'OutputView', outputView);
     WarpedMaskOutline = bwperim(WarpedMask,4);
 
     WarpedLocalWindows = zeros(size(Windows));
     for window = 1:length(Windows)
-        u = Windows(window,2);
-		v = Windows(window,1);
+        u = Windows(window,1);
+		v = Windows(window,2);
         
 		[x, y] = transformPointsForward(tform,u,v);
         
-        WarpedLocalWindows(window,1) = round(x);
-        WarpedLocalWindows(window,2) = round(y);
+        WarpedLocalWindows(window,2) = round(x);
+        WarpedLocalWindows(window,1) = round(y);
         
     end
 end

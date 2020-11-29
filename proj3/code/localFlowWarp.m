@@ -1,15 +1,26 @@
 function [NewLocalWindows] = localFlowWarp(WarpedPrevFrame, CurrentFrame, LocalWindows, Mask, Width)
 % LOCALFLOWWARP Calculate local window movement based on optical flow between frames.
-    
+    ROI = (bwdist(Mask)<30);
     opticFlow = opticalFlowFarneback;
-    disp(opticFlow);
-    estimateFlow(opticFlow, rgb2gray(WarpedPrevFrame));
-    flow = estimateFlow(opticFlow,rgb2gray(CurrentFrame));
+    estimateFlow(opticFlow, rgb2gray(WarpedPrevFrame.*ROI));
+    flow = estimateFlow(opticFlow,rgb2gray(CurrentFrame.*ROI));
+    
+    h = figure;
+    movegui(h);
+    hViewPanel = uipanel(h,'Position',[0 0 1 1],'Title','Plot of Optical Flow Vectors');
+    hPlot = axes(hViewPanel);
+
+    imshow(WarpedPrevFrame)
+    hold on
+    plot(flow,'DecimationFactor',[5 5],'ScaleFactor',2,'Parent',hPlot);
+    hold off
+    pause(10^-3)
     
     NewLocalWindows = zeros(length(LocalWindows),2);
     for window = 1:length(LocalWindows)
         x_w = LocalWindows(window, 1);
         y_w = LocalWindows(window, 2);
+        
         
         radius = round(Width/2);
         mean_Vx = 0;

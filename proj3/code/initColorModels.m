@@ -12,8 +12,8 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     confidence_arr = {};
     
     %Just a visualization for the mask (fore/back).
-    figure
-    imshow(Mask);
+    %figure
+    %imshow(Mask);
     for window = 1:length(LocalWindows)
         %% Gather Pixels
         %Get the (middle) x,y coordinate of this window
