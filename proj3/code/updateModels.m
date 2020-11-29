@@ -32,8 +32,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         y_w = NewLocalWindows(window, 1);
         x_w = NewLocalWindows(window, 2);
         
-        previous_gmm_f = fitgmdist(ColorModels{window}.foreground, NUM_GAUSS, 'RegularizationValue', REG);
-        previous_gmm_b = fitgmdist(ColorModels{window}.background, NUM_GAUSS, 'RegularizationValue', REG);
+        previous_gmm_f = ColorModels{window}.gmm_f;
+        previous_gmm_b = ColorModels{window}.gmm_b;
         
         old_num_f = 0;
         new_num_f = 0;
