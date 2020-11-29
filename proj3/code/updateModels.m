@@ -66,10 +66,10 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         %get the center of the window +/- WindowWidth/2 to get the upper
         %and lower bound of the window so we can iterate over each pixel in
         %window to get the number of foreground pixels
-        win_lower_x = x_w - SIGMA_C + 1;
-        win_upper_x = x_w - SIGMA_C + WindowWidth;
-        win_lower_y = y_w - SIGMA_C + 1;
-        win_upper_y = y_w - SIGMA_C + WindowWidth;
+        win_lower_x = round(x_w - SIGMA_C + 1);
+        win_upper_x = round(x_w - SIGMA_C + WindowWidth);
+        win_lower_y = round(y_w - SIGMA_C + 1);
+        win_upper_y = round(y_w - SIGMA_C + WindowWidth);
         if win_lower_x < 1
             win_lower_x = 1;
         end
@@ -170,7 +170,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             ColorModels{window}.prob = prob;
             
             % Update ColorModel distance
-            d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
             ColorModels{window}.dist = d_x;
             top = 0;
             bot = 0;
