@@ -183,20 +183,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
             confidence = 1 - (top/bot);
             confidence_arr{window} = confidence;
-        else
-            ColorModels{window}.foreground = new_foreground;
-            ColorModels{window}.background = new_background;
-            [r, c, ~] = size(Win);
-            window_channels = reshape(double(Win),[r*c 3]);
-            likelihood_f = pdf(previous_gmm_f,window_channels);
-            likelihood_b = pdf(previous_gmm_b,window_channels);
-            prob = likelihood_f./(likelihood_f+likelihood_b);
-
-            disp(size(prob));
-            prob = reshape(prob, [WindowWidth WindowWidth]);
-            ColorModels{window}.prob = prob;
-            d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
-            ColorModels{window}.dist = d_x;
         end
         ColorModels{length(NewLocalWindows)+1}.Confidences = confidence_arr;
     end
