@@ -108,7 +108,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 if prob > upper_thresh 
                     vertcat(new_foreground, pixel);
                     old_num_f = old_num_f + 1;
-                elseif prob > lower_thresh
+                else if prob > lower_thresh
                     vertcat(new_background, pixel);
                 end
             end
