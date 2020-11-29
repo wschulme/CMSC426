@@ -23,6 +23,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     IMG = rgb2lab(CurrentFrame);
     [x1,y1,z1] = size(IMG); %dimensions of the image
     dx_init = bwdist(warpedMaskOutline);
+    upper_thresh = .75;
+    lower_thresh = .25;
     
     % Just a visualization for the mask (fore/back).
     imshow(warpedMask);
@@ -103,11 +105,10 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 %foreground probability at specifix pixel
                 prob = likelihood_f./(likelihood_f+likelihood_b);
                 
-                if prob > .75 
+                if prob > upper_thresh 
                     vertcat(new_foreground, pixel);
                     old_num_f = old_num_f + 1;
-                end
-                if prob > .25
+                else if prob > lower_thresh
                     vertcat(new_background, pixel);
                 end
             end
@@ -125,7 +126,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 likelihood_f = pdf(new_gmm_f, pixel);
                 likelihood_b = pdf(new_gmm_b, pixel);
                 prob = likelihood_f./(likelihood_f+likelihood_b);
-                if prob > .75 
+                if prob > upper_thresh
                     new_num_f = new_num_f + 1;
                 end
             end
