@@ -200,10 +200,9 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         NewSigma = SigmaMin + (A * (colorconf{window} - fcutoff)^R);
         
-        %if colormodel is less than 50% confident move onto using the shape
+        %if colormodel is less than fcutoff confident move onto using the shape
         %model, otherwise just continue to use sigmaMin
-        %should this be .5 or fcutoff not sure
-        if (colorconf{window} < .5)
+        if (colorconf{window} < fcutoff)
             fsx = 1 - exp(-(d.^2) ./ SigmaMin.^2);
             ShapeConfidences{window}.Sigma = SigmaMin;
         else
@@ -222,15 +221,14 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         y_w = NewLocalWindows(window, 1);
         x_w = NewLocalWindows(window, 2);
         
-        % basically just the formula
+        % basically just the given formula
         fsx = ShapeConfidences{window}.Confidences;
         pkfx = fsx .* warpedMask{window} + (1 - fsx).* ColorModels{window}.prob;
         epsilon = .1;
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
 
-        % Iterate over the window (Win). and finding foreground pixels 
-        % using old gmm
+        % calculate numer and denom for merging formula
         for x = 1:size(Win,1)
             for y = 1:size(Win,2)
                 x_img = floor(x_w - SIGMA_C + x);
