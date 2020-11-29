@@ -22,18 +22,19 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     REG = .001;
     NUM_GAUSS = 3;
     IMG = rgb2lab(CurrentFrame);
-    [x1,y1,z1] = size(IMG); %dimensions of the image
+    [x1,y1,z1] = size(IMG) %dimensions of the image
     dx_init = bwdist(warpedMaskOutline);
     upper_thresh = .75;
     lower_thresh = .25;
+    confidence_arr = {};
     
     % Just a visualization for the mask (fore/back).
     imshow(warpedMask);
 
     %% Previous + New Frames
     for window = 1:length(NewLocalWindows)
-        y_w = NewLocalWindows(window, 1);
-        x_w = NewLocalWindows(window, 2);
+        x_w = NewLocalWindows(window, 1)
+        y_w = NewLocalWindows(window, 2)
         
         previous_gmm_f = ColorModels{window}.gmm_f;
         previous_gmm_b = ColorModels{window}.gmm_b;
@@ -82,14 +83,19 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         if win_upper_y > y1
             win_upper_y = y1;
         end
+        win_lower_x = win_lower_x
+        win_lower_y = win_lower_y
+        win_upper_x = win_upper_x
+        win_upper_y = win_upper_y
         
-        WindowWidthX = abs(round(win_upper_x - win_lower_x));
-        WindowWidthY = abs(round(win_upper_y - win_lower_y));
+        WindowWidthX = abs(round(win_upper_x - win_lower_x))
+        WindowWidthY = abs(round(win_upper_y - win_lower_y))
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         Win_mask = (warpedMask(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         d_x = (dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         
+        size(Win)
         %Iterate over the window (Win). and finding foreground pixels using
         %old gmm
         for x = 1:size(Win,1)
@@ -159,7 +165,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             ColorModels{window}.foreground = new_foreground;
             ColorModels{window}.background = new_background;
             
-            [r, c, ~] = size(Win);
+            [r, c, ~] = size(Win)
             window_channels = reshape(double(Win),[r*c 3]);
             
             % Update ColorModel probability
@@ -183,8 +189,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             confidence = 1 - (top/bot);
             confidence_arr{window} = confidence;
         end
-        ColorModels{length(NewLocalWindows)+1}.Confidences = confidence_arr;
     end
+    ColorModels{length(NewLocalWindows)+1}.Confidences = confidence_arr;
     
     %% Updating Shape Model
     ShapeConfidences = ...
