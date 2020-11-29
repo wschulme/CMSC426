@@ -72,6 +72,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
         likelihood_f = pdf(gmm_f,window_channels);
         likelihood_b = pdf(gmm_b,window_channels);
         prob = likelihood_f./(likelihood_f+likelihood_b);
+        
         %Reshape prob matrix to use it in final equation as row x col
         %instead of n x 1
         prob = reshape(prob, [WindowWidth+1 WindowWidth+1]);

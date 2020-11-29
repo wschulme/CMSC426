@@ -24,10 +24,10 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     [x1,y1,z1] = size(IMG); %dimensions of the image
     dx_init = bwdist(warpedMaskOutline);
     
-    %Just a visualization for the mask (fore/back).
+    % Just a visualization for the mask (fore/back).
     imshow(warpedMask);
 
-    
+    %% Previous + New Frames
     for window = 1:length(NewLocalWindows)
         y_w = NewLocalWindows(window, 1);
         x_w = NewLocalWindows(window, 2);
@@ -85,7 +85,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         WindowWidthY = abs(round(win_upper_y - win_lower_y));
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
-
+        
         %Iterate over the window (Win). and finding foreground pixels using
         %old gmm
         for x = 1:size(Win,1)
@@ -131,19 +131,26 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
         end
         
-        %update color model if more foreground pixels
+        %% Updating Color Model
+        % Update ColorModel if more foreground pixels
         if (new_num_f <= old_num_f)
+            % Update ColorModel gmm + fore/background
             ColorModels{window}.gmm_f = new_gmm_f;
             ColorModels{window}.gmm_b = new_gmm_b;
             ColorModels{window}.foreground = new_foreground;
             ColorModels{window}.background = new_background;
+            
             [r, c, ~] = size(Win);
             window_channels = reshape(double(Win),[r*c 3]);
+            
+            % Update ColorModel probability
             likelihood_f = pdf(new_gmm_f,window_channels);
             likelihood_b = pdf(new_gmm_b,window_channels);
             prob = likelihood_f./(likelihood_f+likelihood_b);
             prob = reshape(prob, [WindowWidth WindowWidth]);
             ColorModels{window}.prob = prob;
+            
+            % Update ColorModel distance
             d_x = dx_init(win_lower_x:win_upper_x, win_lower_y:win_upper_y);
             ColorModels{window}.dist = d_x;
             top = 0;
@@ -165,7 +172,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             likelihood_f = pdf(previous_gmm_f,window_channels);
             likelihood_b = pdf(previous_gmm_b,window_channels);
             prob = likelihood_f./(likelihood_f+likelihood_b);
-            disp(size(Win))
+
             disp(size(prob));
             prob = reshape(prob, [WindowWidth WindowWidth]);
             ColorModels{window}.prob = prob;
@@ -175,6 +182,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         ColorModels{length(NewLocalWindows)+1}.Confidences = confidence_arr;
     end
     
+    %% Updating Shape Model
     ShapeConfidences = ...
         initShapeConfidences(NewLocalWindows, ColorModels, WindowWidth, SigmaMin, A, fcutoff, R);
     
@@ -205,6 +213,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         ShapeConfidences{window}.Confidences = fsx;
     end
     
+    %% Merging
     numer_sum = zeros([x1 y1]);
     denom_sum = zeros([x1 y1]);
     % merging the windows
@@ -219,8 +228,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
 
-        %Iterate over the window (Win). and finding foreground pixels using
-        %old gmm
+        % Iterate over the window (Win). and finding foreground pixels 
+        % using old gmm
         for x = 1:size(Win,1)
             for y = 1:size(Win,2)
                 x_img = floor(x_w - SIGMA_C + x);
