@@ -42,8 +42,8 @@ function [NewLocalWindows] = localFlowWarp(WarpedPrevFrame, CurrentFrame, LocalW
         mean_Vx = mean_Vx / count;
         mean_Vy = mean_Vy / count;
         
-        NewLocalWindows(window,2) = x_w + mean_Vx;
-        NewLocalWindows(window,1) = y_w + mean_Vy;
+        NewLocalWindows(window,1) = x_w + mean_Vx;
+        NewLocalWindows(window,2) = y_w + mean_Vy;
         %disp([NewLocalWindows(window,1), NewLocalWindows(window,2)]);
     end
 end

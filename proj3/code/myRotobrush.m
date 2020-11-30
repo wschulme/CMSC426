@@ -80,7 +80,6 @@ for prev=1:(length(files)-1)
     fprintf('Current frame: %i\n', curr)
 
     %%% Global affine transform between previous and current frames:
-    disp("before mask: " + size(mask));
     [warpedFrame, warpedMask, warpedMaskOutline, warpedLocalWindows] = calculateGlobalAffine(images{prev}, images{curr}, mask, LocalWindows);
     
     %%% Calculate and apply local warping based on optical flow:

@@ -11,11 +11,9 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     % We allow a small pixel room for error to account for difference in
     % frames.
     error = 30;
-    disp("mask x: " + size(mask_coordinates(:,1)) + " --- mask y: " + size(mask_coordinates(:,2)));
+    
     % Convert imgs to masks of imgs
     img1 = rgb2gray(IMG1);
-    disp(max_x+error);
-    
     img1 = img1(min_x-error:max_x+error, min_y-error:max_y+error);
     img2 = rgb2gray(IMG2);
     img2 = img2(min_x-error:max_x+error, min_y-error:max_y+error);
