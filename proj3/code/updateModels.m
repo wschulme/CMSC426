@@ -233,8 +233,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     denom_sum = zeros([x1 y1]);
     % merging the windows
     for window = 1:length(NewLocalWindows)
-        y_w = NewLocalWindows(window, 1);
-        x_w = NewLocalWindows(window, 2);
+        x_w = NewLocalWindows(window, 1);
+        y_w = NewLocalWindows(window, 2);
         
         maskCut = (warpedMask(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         
@@ -251,7 +251,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 x_img = ceil(x_w - SIGMA_C + x);
                 y_img = ceil(y_w - SIGMA_C + y);
                 if(y_img <= size(Win,2) && x_img <= size(Win,1))
-                    distance_to_center = sqrt((x_img - y_w)^2 + (y_img - x_w)^2);
+                    distance_to_center = sqrt((x_img - x_w)^2 + (y_img - y_w)^2);
                     d = (distance_to_center + epsilon)^-1;
                     numer_sum(x_img, y_img) = numer_sum(x_img, y_img) + pkfx(x,y) *d;
                     denom_sum(x_img, y_img) = denom_sum(x_img, y_img) + d;
