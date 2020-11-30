@@ -259,9 +259,22 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
         end
     end
-    
-    pfx = numer_sum./denom_sum;
+    pfx = zeros(size(numer_sum));
+    for x=1:size(numer_sum,1)
+        for y=1:size(numer_sum,2)
+            if denom_sum(x,y)~=0
+                pfx(x,y) = numer_sum(x,y)/denom_sum(x,y);
+            else
+                pfx(x,y)= 0;
+            end
+        end
+    end
+    disp(pfx);
     LocalWindows = NewLocalWindows;
     % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
     mask = (pfx > ProbMaskThreshold);
+    mask = imfill(mask,'holes');
+    figure
+    imshow(mask);
+    error("a");
 end
