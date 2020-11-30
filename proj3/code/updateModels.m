@@ -26,6 +26,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     dx_init = bwdist(warpedMaskOutline);
     upper_thresh = .75;
     lower_thresh = .25;
+    left = [];
+    right = [];
     %confidence_arr = {};
     
     % Just a visualization for the mask (fore/back).
@@ -36,7 +38,9 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         disp("Updating Window: ");
         disp(window);
         x_w = NewLocalWindows(window, 1);
+        left = [left; x_w];
         y_w = NewLocalWindows(window, 2);
+        right = [right; y_w];
         
         previous_gmm_f = ColorModels.gmm_f{window};
         previous_gmm_b = ColorModels.gmm_b{window};
@@ -271,7 +275,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
         end
     end
-    LocalWindows = NewLocalWindows;
+    tempWindows = [right, left];
+    LocalWindows = tempWindows;
     % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
     mask = (pfx > ProbMaskThreshold);
     mask = imfill(mask,'holes');
