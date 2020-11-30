@@ -20,8 +20,8 @@ function [NewLocalWindows] = localFlowWarp(WarpedPrevFrame, CurrentFrame, LocalW
     for window = 1:length(LocalWindows)
         x_w = LocalWindows(window, 1);
         y_w = LocalWindows(window, 2);
-        disp([x_w, y_w]);
-        disp("V");
+        %disp([x_w, y_w]);
+        %disp("V");
         
         
         radius = round(Width/2);
@@ -44,7 +44,7 @@ function [NewLocalWindows] = localFlowWarp(WarpedPrevFrame, CurrentFrame, LocalW
         
         NewLocalWindows(window,1) = x_w + mean_Vx;
         NewLocalWindows(window,2) = y_w + mean_Vy;
-        disp([NewLocalWindows(window,1), NewLocalWindows(window,2)]);
+        %disp([NewLocalWindows(window,1), NewLocalWindows(window,2)]);
     end
 end
 

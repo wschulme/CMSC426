@@ -18,7 +18,6 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     img2 = rgb2gray(IMG2);
     img2 = img2(min_x-error:max_x+error, min_y-error:max_y+error);
     
-    
     % Getting the features for analyizing the general picture motion though
     % estimateGeometricTransform
     ptsOriginal  = detectHarrisFeatures(img1); %detectSURFFeatures(img1, 'ROI', ROI);

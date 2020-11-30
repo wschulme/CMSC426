@@ -71,9 +71,6 @@ set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
 
-% CHANGED!!!!
-% THIRD ARGUMENT OG: ColorModels.Confidences 
-% --> ColorModels(length(LocalWindows)+1).Confidences
 showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows,WindowWidth);
 
 %%% MAIN LOOP %%%
@@ -81,7 +78,7 @@ showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows
 for prev=1:(length(files)-1)
     curr = prev+1;
     fprintf('Current frame: %i\n', curr)
-    
+
     %%% Global affine transform between previous and current frames:
     [warpedFrame, warpedMask, warpedMaskOutline, warpedLocalWindows] = calculateGlobalAffine(images{prev}, images{curr}, mask, LocalWindows);
     

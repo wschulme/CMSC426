@@ -269,12 +269,10 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             end
         end
     end
-    disp(pfx);
     LocalWindows = NewLocalWindows;
     % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
     mask = (pfx > ProbMaskThreshold);
     mask = imfill(mask,'holes');
     figure
     imshow(mask);
-    error("a");
 end
