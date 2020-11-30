@@ -4,9 +4,9 @@
 % However many of the most important functions are left for you to implement.
 % Feel free to modify this code as you see fit.
 % Some parameters you need to tune:
-WindowWidth = 30;  
+WindowWidth = 40;  
 ProbMaskThreshold = .001; 
-NumWindows= 15; 
+NumWindows= 5; 
 BoundaryWidth = 5;
 
 ROIPOLY = false;
@@ -37,14 +37,14 @@ else
     load('mask.mat', 'mask');
 end
 
-%imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
+imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
 set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
-%imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
+imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
 outputVideo = VideoWriter(fullfile(fpath,'video.mp4'),'MPEG-4');
 open(outputVideo);
-%writeVideo(outputVideo,I);
+writeVideo(outputVideo,I);
 
 % Sample local windows and initialize shape+color models:
 [mask_outline, LocalWindows] = initLocalWindows(images{1},mask,NumWindows,WindowWidth,true);
@@ -78,7 +78,7 @@ showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows
 
 %%% MAIN LOOP %%%
 % Process each frame in the video.
-for prev=1:(length(files)-1)
+for prev=2:(length(files)-1)
     curr = prev+1;
     fprintf('Current frame: %i\n', curr)
     
@@ -90,6 +90,7 @@ for prev=1:(length(files)-1)
         localFlowWarp(warpedFrame, images{curr}, warpedLocalWindows,warpedMask,WindowWidth);
     
     % Show windows before and after optical flow-based warp:
+    figure
     imshow(images{curr});
     hold on
     showLocalWindows(warpedLocalWindows,WindowWidth,'r.');
@@ -127,10 +128,10 @@ for prev=1:(length(files)-1)
     % Write video frame:
     imshow(imoverlay(images{curr}, boundarymask(mask,8), 'red'));
     set(gca,'position',[0 0 1 1],'units','normalized')
-    %F = getframe(gcf);
-    %[I,~] = frame2im(F);
-    %imwrite(I, fullfile(fpath, strip(imageNames(curr,:))));
-    %writeVideo(outputVideo,I);
+    F = getframe(gcf);
+    [I,~] = frame2im(F);
+    imwrite(I, fullfile(fpath, strip(imageNames(curr,:))));
+    writeVideo(outputVideo,I);
 
     imshow(images{curr})
     hold on

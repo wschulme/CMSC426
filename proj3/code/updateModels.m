@@ -22,7 +22,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     REG = .001;
     NUM_GAUSS = 3;
     IMG = rgb2lab(CurrentFrame);
-    [x1,y1,z1] = size(IMG); %dimensions of the image
+    [x1,y1,~] = size(IMG); %dimensions of the image
     dx_init = bwdist(warpedMaskOutline);
     upper_thresh = .75;
     lower_thresh = .25;
@@ -227,6 +227,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         ShapeConfidences.Confidences{window} = fsx;
     end
     
+    disp("Merging...");
     %% Merging
     numer_sum = zeros([x1 y1]);
     denom_sum = zeros([x1 y1]);
@@ -249,9 +250,12 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             for y = 1:size(Win,2)
                 x_img = ceil(x_w - SIGMA_C + x);
                 y_img = ceil(y_w - SIGMA_C + y);
-                distance_to_center = sqrt((x_img - y_w)^2 + (y_img - x_w)^2);
-                numer_sum(x_img, y_img) = numer_sum(x_img, y_img) + pkfx(x_img,y_img) * (distance_to_center + epsilon)^-1;
-                denom_sum(x_img, y_img) = denom_sum(x_img, y_img) + (distance_to_center + epsilon)^-1;
+                if(y_img <= size(Win,2) && x_img <= size(Win,1))
+                    distance_to_center = sqrt((x_img - y_w)^2 + (y_img - x_w)^2);
+                    d = (distance_to_center + epsilon)^-1;
+                    numer_sum(x_img, y_img) = numer_sum(x_img, y_img) + pkfx(x,y) *d;
+                    denom_sum(x_img, y_img) = denom_sum(x_img, y_img) + d;
+                end
             end
         end
     end
