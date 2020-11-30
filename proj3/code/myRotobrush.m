@@ -142,4 +142,4 @@ for prev=1:(length(files)-1)
     [I,~] = frame2im(F);
 end
 
-%close(outputVideo);
+close(outputVideo);
