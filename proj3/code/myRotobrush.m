@@ -6,7 +6,7 @@
 % Some parameters you need to tune:
 WindowWidth = 40;  
 ProbMaskThreshold = .001; 
-NumWindows= 5; 
+NumWindows= 4; 
 BoundaryWidth = 5;
 
 ROIPOLY = false;
@@ -142,4 +142,4 @@ for prev=1:(length(files)-1)
     [I,~] = frame2im(F);
 end
 
-%close(outputVideo);
+close(outputVideo);
