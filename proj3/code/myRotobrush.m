@@ -78,7 +78,7 @@ showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows
 
 %%% MAIN LOOP %%%
 % Process each frame in the video.
-for prev=2:(length(files)-1)
+for prev=1:(length(files)-1)
     curr = prev+1;
     fprintf('Current frame: %i\n', curr)
     
