@@ -35,8 +35,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     for window = 1:length(NewLocalWindows)
         disp("Updating Window: ");
         disp(window);
-        x_w = NewLocalWindows(window, 1);
-        y_w = NewLocalWindows(window, 2);
+        y_w = NewLocalWindows(window, 1);
+        x_w = NewLocalWindows(window, 2);
         
         previous_gmm_f = ColorModels.gmm_f{window};
         previous_gmm_b = ColorModels.gmm_b{window};
@@ -275,7 +275,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
     mask = (pfx > ProbMaskThreshold);
     mask = imfill(mask,'holes');
+    
+    disp("updated mask: " + size(mask));
     figure
     imshow(mask);
-    error("a");
 end
