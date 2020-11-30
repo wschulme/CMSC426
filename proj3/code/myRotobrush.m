@@ -74,7 +74,7 @@ F = getframe(gcf);
 % CHANGED!!!!
 % THIRD ARGUMENT OG: ColorModels.Confidences 
 % --> ColorModels(length(LocalWindows)+1).Confidences
-showColorConfidences(images{1},mask_outline,ColorModels{length(LocalWindows)+1}.Confidences,LocalWindows,WindowWidth);
+showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows,WindowWidth);
 
 %%% MAIN LOOP %%%
 % Process each frame in the video.
@@ -127,10 +127,10 @@ for prev=1:(length(files)-1)
     % Write video frame:
     imshow(imoverlay(images{curr}, boundarymask(mask,8), 'red'));
     set(gca,'position',[0 0 1 1],'units','normalized')
-    F = getframe(gcf);
-    [I,~] = frame2im(F);
-    imwrite(I, fullfile(fpath, strip(imageNames(curr,:))));
-    writeVideo(outputVideo,I);
+    %F = getframe(gcf);
+    %[I,~] = frame2im(F);
+    %imwrite(I, fullfile(fpath, strip(imageNames(curr,:))));
+    %writeVideo(outputVideo,I);
 
     imshow(images{curr})
     hold on
@@ -141,4 +141,4 @@ for prev=1:(length(files)-1)
     [I,~] = frame2im(F);
 end
 
-close(outputVideo);
+%close(outputVideo);
