@@ -5,7 +5,7 @@
 % Feel free to modify this code as you see fit.
 % Some parameters you need to tune:
 WindowWidth = 40;  
-ProbMaskThreshold = .001; 
+ProbMaskThreshold = .8; 
 NumWindows= 4; 
 BoundaryWidth = 5;
 
@@ -53,10 +53,10 @@ ColorModels = ...
     initColorModels(images{1},mask,mask_outline,LocalWindows,BoundaryWidth,WindowWidth);
 
 % You should set these parameters yourself:
-fcutoff = 10;
-SigmaMin = 10;
+fcutoff = .6;
+SigmaMin = 6;
 SigmaMax = 60;
-R = 5;
+R = 3;
 A = 5;
 ShapeConfidences = ...
     initShapeConfidences(LocalWindows,ColorModels,...
