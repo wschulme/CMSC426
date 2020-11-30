@@ -250,7 +250,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 x_img = ceil(x_w - SIGMA_C + x);
                 y_img = ceil(y_w - SIGMA_C + y);
                 distance_to_center = sqrt((x_img - y_w)^2 + (y_img - x_w)^2);
-                numer_sum(x_img, y_img) = numer_sum(x_img, y_img) + pkfx * (distance_to_center + epsilon)^-1;
+                numer_sum(x_img, y_img) = numer_sum(x_img, y_img) + pkfx(x_img,y_img) * (distance_to_center + epsilon)^-1;
                 denom_sum(x_img, y_img) = denom_sum(x_img, y_img) + (distance_to_center + epsilon)^-1;
             end
         end
