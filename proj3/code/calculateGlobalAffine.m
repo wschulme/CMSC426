@@ -32,8 +32,9 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     matchedPtsOriginal  = validPtsOriginal(index_pairs(:,1));
     matchedPtsDistorted = validPtsDistorted(index_pairs(:,2));
     
-    figure 
-    showMatchedFeatures(img1,img2,matchedPtsOriginal,matchedPtsDistorted)
+    %figure 
+    %showMatchedFeatures(img1,img2,matchedPtsOriginal,matchedPtsDistorted)
+    
     
     % getting the general geometric transformation of the image
     [tform, ~] = estimateGeometricTransform(matchedPtsOriginal, matchedPtsDistorted, 'affine');
@@ -43,17 +44,16 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     WarpedFrame = imwarp(IMG1, tform, 'OutputView', outputView);
     WarpedMask = imwarp(Mask, tform, 'OutputView', outputView);
     WarpedMaskOutline = bwperim(WarpedMask,4);
-
+    
     WarpedLocalWindows = zeros(size(Windows));
     for window = 1:length(Windows)
         u = Windows(window,1);
 		v = Windows(window,2);
         
-		[x, y] = transformPointsForward(tform,u,v);
+		[x, y] = transformPointsForward(invert(tform),u,v);
         
-        WarpedLocalWindows(window,2) = round(x);
-        WarpedLocalWindows(window,1) = round(y);
-        
+        WarpedLocalWindows(window,1) = floor(x);
+        WarpedLocalWindows(window,2) = floor(y);
     end
 end
 

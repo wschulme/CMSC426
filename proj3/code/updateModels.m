@@ -29,6 +29,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     %confidence_arr = {};
     
     % Just a visualization for the mask (fore/back).
+    figure
     imshow(warpedMask);
 
     %% Previous + New Frames
@@ -233,8 +234,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     denom_sum = zeros([x1 y1]);
     % merging the windows
     for window = 1:length(NewLocalWindows)
-        x_w = NewLocalWindows(window, 1);
-        y_w = NewLocalWindows(window, 2);
+        x_w = NewLocalWindows(window, 2);
+        y_w = NewLocalWindows(window, 1);
 
         maskCut = (warpedMask(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         
