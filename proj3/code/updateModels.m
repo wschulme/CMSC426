@@ -20,12 +20,12 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
 %% Variables
     SIGMA_C = WindowWidth/2;
     REG = .001;
-    NUM_GAUSS = 3;
+    NUM_GAUSS = 5;
     IMG = rgb2lab(CurrentFrame);
     [x1,y1,~] = size(IMG); %dimensions of the image
     dx_init = bwdist(warpedMaskOutline);
-    upper_thresh = .75;
-    lower_thresh = .25;
+    upper_thresh = 0;
+    lower_thresh = 0;
     %confidence_arr = {};
     
     % Just a visualization for the mask (fore/back).
@@ -226,8 +226,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         end
         
         ShapeConfidences.Confidences{window} = fsx;
+
     end
-    
     disp("Merging...");
     %% Merging
     numer_sum = zeros([x1 y1]);
@@ -236,15 +236,24 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     for window = 1:length(NewLocalWindows)
         x_w = NewLocalWindows(window, 2);
         y_w = NewLocalWindows(window, 1);
+        
+        win_lower_x = ceil(x_w - SIGMA_C);
+        win_upper_x = ceil(x_w + SIGMA_C);
+        win_lower_y = ceil(y_w - SIGMA_C);
+        win_upper_y = ceil(y_w + SIGMA_C);
 
         maskCut = (warpedMask(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
         
         % basically just the given formula
         fsx = ShapeConfidences.Confidences{window};
-        pkfx = fsx * (maskCut) + (1 - fsx) * ColorModels.prob{window};
+        pkfx = fsx .* (maskCut) + (1 - fsx) .* ColorModels.prob{window};
         epsilon = .1;
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
+        figure
+        imshow(lab2rgb(Win));
+        figure
+        imshow(pkfx);
 
         % calculate numer and denom for merging formula
         for x = 1:size(Win,1)
@@ -267,6 +276,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         for y=1:size(numer_sum,2)
             if denom_sum(x,y)~=0
                 pfx(x,y) = numer_sum(x,y)/denom_sum(x,y);
+                disp(pfx(x,y));
             else
                 pfx(x,y)= 0;
             end
@@ -274,7 +284,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     end
     LocalWindows = NewLocalWindows;
     % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
-    mask = (pfx > ProbMaskThreshold);
+    mask = (pfx > 0.4);
     mask = imfill(mask,'holes');
     
     disp("updated mask: " + size(mask));
