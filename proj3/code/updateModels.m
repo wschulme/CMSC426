@@ -29,8 +29,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     %confidence_arr = {};
     
     % Just a visualization for the mask (fore/back).
-    figure
-    imshow(warpedMask);
+    %figure
+    %imshow(warpedMask);
 
     %% Previous + New Frames
     for window = 1:length(NewLocalWindows)
@@ -250,10 +250,10 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         epsilon = .1;
         
         Win = (IMG(win_lower_x:win_upper_x, win_lower_y:win_upper_y,:));
-        figure
-        imshow(lab2rgb(Win));
-        figure
-        imshow(pkfx);
+        %figure
+        %imshow(lab2rgb(Win));
+        %figure
+        %imshow(pkfx);
 
         % calculate numer and denom for merging formula
         for x = 1:size(Win,1)
@@ -284,10 +284,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     end
     LocalWindows = NewLocalWindows;
     % https://www.mathworks.com/help/images/create-binary-mask-from-grayscale-image.html
-    mask = (pfx > 0.4);
+    mask = (pfx > 0.6);
     mask = imfill(mask,'holes');
-    
     disp("updated mask: " + size(mask));
-    figure
-    imshow(mask);
 end

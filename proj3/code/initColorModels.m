@@ -6,7 +6,7 @@ function ColorModels = initializeColorModels(IMG, Mask, MaskOutline, LocalWindow
     %% Variables
     SIGMA_C = WindowWidth/2;
     REG = .001;
-    NUM_GAUSS = 3;
+    NUM_GAUSS = 5;
     IMG = rgb2lab(IMG);
     dx_init = bwdist(MaskOutline);
     confidence_arr = {};

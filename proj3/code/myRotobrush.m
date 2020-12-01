@@ -4,9 +4,9 @@
 % However many of the most important functions are left for you to implement.
 % Feel free to modify this code as you see fit.
 % Some parameters you need to tune:
-WindowWidth = 40;  
+WindowWidth = 100;  
 ProbMaskThreshold = 85; 
-NumWindows= 4; 
+NumWindows= 7; 
 BoundaryWidth = 5;
 
 ROIPOLY = false;

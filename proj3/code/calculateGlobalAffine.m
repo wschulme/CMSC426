@@ -1,22 +1,11 @@
 function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calculateGlobalAffine(IMG1,IMG2,Mask,Windows)
 % CALCULATEGLOBALAFFINE: finds affine transform between two frames, and applies it to frame1, the mask, and local windows.
-    % Select object
-	min_x = min(Windows(:,2));
-	max_x = max(Windows(:,2));
-	min_y = min(Windows(:,1));
-	max_y = max(Windows(:,1));
     
-    % We allow a small pixel room for error to account for difference in
-    % frames.
-    error = 0;
-    disp("mask x: " + size(Windows(:,1)) + " --- mask y: " + size(Windows(:,2)));
     % Convert imgs to masks of imgs
     img1 = rgb2gray(IMG1);
     
-    disp("max_x and error: " + max_x + " + " + error);
-    img1 = img1(min_x-error:max_x+error, min_y-error:max_y+error);
     img2 = rgb2gray(IMG2);
-    img2 = img2(min_x-error:max_x+error, min_y-error:max_y+error);
+    
     
     % Getting the features for analyizing the general picture motion though
     % estimateGeometricTransform
@@ -33,7 +22,7 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     matchedPtsDistorted = validPtsDistorted(index_pairs(:,2));
     
     %figure 
-    %showMatchedFeatures(img1,img2,matchedPtsOriginal,matchedPtsDistorted)
+    showMatchedFeatures(img1,img2,matchedPtsOriginal,matchedPtsDistorted)
     
     
     % getting the general geometric transformation of the image
