@@ -17,16 +17,21 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
             
             % Grab origin of tag 10
             if i == 1 && newDet{i}(j).TagID == 10
-                origin = newDet{i}(j).p1;
+                Tag10 = newDet{i}(j);
             end
         end
     end
     
     DetAll = newDet;
-    fprintf('Tag10 Origin: (%f, %f) \n', origin(1), origin(2));
+    fprintf('Tag10 Origin: (%f, %f) \n', Tag10.p1(1), Tag10.p1(2));
     
-    %% Global Initialization
-    graph = NonlinearFactorGraph;
+    %% Pre-GTSAM
+    %Calculate initial homography assuming a planar carpet of April Tags
+    imageCoords = [Tag10.p1; Tag10.p2; Tag10.p3; Tag10.p4];
+    worldCoords = [[0,0];[TagSize,0];[0,TagSize];[TagSize,TagSize]];
+    
+    H = est_homography(worldCoords(1,:), worldCoords(2,:), imageCoords(1,:), imageCoords(2,:));
+    disp(H);
 end
 
 function Detection = getDetection(det)
