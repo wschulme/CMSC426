@@ -23,7 +23,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     DetAll = newDet;
-    disp(origin);
+    fprintf('Tag10 Origin: (%f, %f) \n', origin(1), origin(2));
+    
+    %% Global Initialization
+    graph = NonlinearFactorGraph;
 end
 
 function Detection = getDetection(det)
