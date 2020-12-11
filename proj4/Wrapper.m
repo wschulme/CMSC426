@@ -6,26 +6,25 @@ clc
 clear all
 close all
 
-ToolboxPath = 'gtsam_toolbox';
-DataPath = './Data/'
 %% Add ToolBox to Path eg. ToolboxPath = 'gtsam_toolbox';
+ToolboxPath = 'gtsam_toolbox';
 addpath(ToolboxPath);
 
 %% Load Data
 % Download data from the following link: 
 % https://drive.google.com/open?id=1ZFXZEv4yWgaVDE1JD6-oYL2KQDypnEUU
-load(DataPath + 'CalibParams.mat');
+load('./Data/CalibParams.mat');
 
 %% Load Data (Two datasets have been provided: DataMapping and DataSquare; ...
 %% Uncomment the one you are using):
-load(DataPath + 'DataMapping.mat');
-% load(DataPath + 'DataSquare.mat');
+load('./Data/DataMappingFall2020.mat');
+%load('./Data/DataSquareFall2020.mat');
 
 
 %% SLAM Using GTSAM (DetAll: is a cell array with AprilTag detections per frame along with the TagID, ...
 %  K: Camera Calibration Parameters, TagSize: AprilTag Size in the real world, ...
 %  LeftImgs: cell array where each cell is a Image, TLeftImgs: Timestamps for LeftImgs)
-[LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSize, LeftImgs, TLeftImgs);
+[LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSize);
 
 
 %% Extra Credit: (Uncomment the bottom line if you are doing the Extra credit part.)
