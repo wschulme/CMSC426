@@ -30,8 +30,12 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     imageCoords = [Tag10.p1; Tag10.p2; Tag10.p3; Tag10.p4];
     worldCoords = [[0,0];[TagSize,0];[0,TagSize];[TagSize,TagSize]];
     
-    H = est_homography(worldCoords(1,:), worldCoords(2,:), imageCoords(1,:), imageCoords(2,:));
-    disp(H);
+    H = est_homography(worldCoords(:,1), worldCoords(:,2), imageCoords(:,1), imageCoords(:,2));
+    
+    %Proof of concept. Does this homography get us from image to world?
+    [X,Y] = apply_homography(H, imageCoords(:,1), imageCoords(:,2));
+    disp([X,Y]);
+    
 end
 
 function Detection = getDetection(det)
