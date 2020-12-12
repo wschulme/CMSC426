@@ -26,8 +26,8 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     %% Pre-GTSAM
     %Calculate initial homography assuming a planar carpet of April Tags
-    imageCoords = [Tag10.p1; Tag10.p2; Tag10.p3; Tag10.p4];
-    worldCoords = [[0,0,1];[TagSize,0,1];[0,TagSize,1];[TagSize,TagSize,1]];
+    imageCoords = [Tag10.p1; Tag10.p2; Tag10.p3; Tag10.p4; Tag10.p1];
+    worldCoords = [[0,0,1];[TagSize,0,1];[0,TagSize,1];[TagSize,TagSize,1];[0,0,1]];
     
     H = getHomography(worldCoords, imageCoords);
     [R,T] = getPoseParts(K,H);
@@ -65,18 +65,18 @@ function [R,T] = getPoseParts(K,H)
 end
 
 function H = getHomography(X,x)
-    % X: 3x4 World
-	% x: 2x4 Image
+    % X: World n x 3
+	% x: Image n x 4
     X = X';
     x = x';
-    A = [X(:,1).' 0 0 0 -X(:,1).'*x(1,1);
-         0 0 0 X(:,1).' -X(:,1).'*x(2,1);
-         X(:,2).' 0 0 0 -X(:,2).'*x(1,2);
-         0 0 0 X(:,2).' -X(:,2).'*x(2,2);
-         X(:,3).' 0 0 0 -X(:,3).'*x(1,3);
-         0 0 0 X(:,3).' -X(:,3).'*x(2,3);
-         X(:,4).' 0 0 0 -X(:,4).'*x(1,4);
-         0 0 0 X(:,4).' -X(:,4).'*x(2,4)];
+    sizeX = size(X);
+    
+    A = [];
+    for i = 1:sizeX(2)
+        A = [A; X(:,i).' 0 0 0 -X(:,i).'*x(1,i);
+            0 0 0 X(:,i).' -X(:,i).'*x(2,i)];
+    end
+    
     [~, ~, V] = svd(A.'*A);
     rawH = reshape(V(:,9),3,3)';
     H = rawH/(rawH(3,3));
