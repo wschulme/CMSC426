@@ -41,7 +41,6 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
 %     disp(results(:,3)./results(3,3));
 %     disp(results(:,4)./results(3,4));
     
-    mt,k=[mt,k,xmt,k,y].' 
     
 end
 
