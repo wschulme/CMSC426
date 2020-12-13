@@ -31,17 +31,17 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     H = getHomography(worldCoords, imageCoords);
     [R,T] = getPoseParts(K,H);
-    %pose = getPoseRow(R,T);
+    pose = getPoseRow(R,T);
     
     %Sanity check
-    disp(imageCoords);
-    results = H*worldCoords';
-    disp(results(:,1)./results(3,1));
-    disp(results(:,2)./results(3,2));
-    disp(results(:,3)./results(3,3));
-    disp(results(:,4)./results(3,4));
+%     disp(imageCoords);
+%     results = H*worldCoords';
+%     disp(results(:,1)./results(3,1));
+%     disp(results(:,2)./results(3,2));
+%     disp(results(:,3)./results(3,3));
+%     disp(results(:,4)./results(3,4));
     
-    
+    mt,k=[mt,k,xmt,k,y].' 
     
 end
 
@@ -84,5 +84,9 @@ end
 
 function pose = getPoseRow(R,T)
     %TODO: how tf get quaternions????
-    pose = horzcat([T(1), T(2), T(3)], rotm2quat(R));
+
+    %Each quaternion, one per row, is of the form q = [w x y z]
+    quat = rotm2quat(R);
+    %pose = [PosX, PosY, PosZ, Quaternion, QuaternionX, QuaternionY, QuaternionZ]
+    pose = [transpose(T), quat]
 end
