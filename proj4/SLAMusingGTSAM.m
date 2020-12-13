@@ -24,24 +24,59 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     DetAll = newDet;
     fprintf('Tag10 Origin: (%f, %f) \n', Tag10.p1(1), Tag10.p1(2));
     
-    %% Pre-GTSAM
+    %% Initialization
     %Calculate initial homography assuming a planar carpet of April Tags
-    imageCoords = [Tag10.p1; Tag10.p2; Tag10.p3; Tag10.p4; Tag10.p1];
-    worldCoords = [[0,0,1];[TagSize,0,1];[0,TagSize,1];[TagSize,TagSize,1];[0,0,1]];
+    imageCoords = [Tag10.p1; Tag10.p2; Tag10.p3; Tag10.p4];
+    worldCoords = [[0,0,1];[TagSize,0,1];[0,TagSize,1];[TagSize,TagSize,1]];
     
     H = getHomography(worldCoords, imageCoords);
-    [R,T] = getPoseParts(K,H);
-    pose = getPoseRow(R,T);
     
-    %Sanity check
-%     disp(imageCoords);
-%     results = H*worldCoords';
-%     disp(results(:,1)./results(3,1));
-%     disp(results(:,2)./results(3,2));
-%     disp(results(:,3)./results(3,3));
-%     disp(results(:,4)./results(3,4));
+    % Map: tagID -> Location
+    locations = containers.Map('KeyType','double','ValueType','any');
+    % Map: frame -> Pose
+    poses = containers.Map('KeyType','int32','ValueType','any');
     
+    %% Apply Homography to First Frame
+    NumDetections = size(DetAll{1});
+    for i=1:NumDetections(2)
+        tag = DetAll{1}(i);
+        locations(tag.TagID) = getLocationObject(H, tag); 
+    end
+    poses(1) = getPoseParts(H, K);
     
+    for i=2:length(DetAll)
+        NumDetections = size(DetAll{i});
+        
+        %% Gather World Locations
+        imageCoords = [];
+        worldCoords = [];
+        for j=1:NumDetections(2)
+            tag = DetAll{i}(j);
+            
+            %If we've seen it, it's useful for calculating a homography
+            if isKey(locations,tag.TagID)
+                world = locations(tag.TagID);
+                imageCoords = [imageCoords; tag.p1; tag.p2; tag.p3; tag.p4];
+                worldCoords = [worldCoords; world.p1; world.p2; world.p3; world.p4];
+            end
+        end
+        
+        %% Calculate New Homography
+        H = getHomography(worldCoords, imageCoords);
+        
+        %% Apply New Homography and Store Locations
+        for j=1:NumDetections(2)
+            tag = DetAll{i}(j);
+            %I'm skipping locations we've already found to save time
+            if ~isKey(locations,tag.TagID)
+                locations(tag.TagID) = getLocationObject(H, tag); 
+                disp(locations(tag.TagID).p1);
+            end
+        end
+        
+        %% Store Pose
+        poses(i) = getPoseParts(H, K);
+    end
 end
 
 function Detection = getDetection(det)
@@ -52,40 +87,10 @@ Detection.p3 = [det(6), det(7)];
 Detection.p4 = [det(8), det(9)];
 end
 
-function [R,T] = getPoseParts(K,H)
-    KH = inv(K)*H;
-    temp = [KH(:,1) KH(:,2) cross(KH(:,1),KH(:,2))];
-    [U,~,V] = svd(temp);
-    R = U*[1 0 0; 0 1 0; 0 0 det(U*V.')]*V.';
-    T = KH(:,3)/norm(KH(:,1),2);
-    %Note: Dan has this as -T. We will need to see if it works like this or
-    %+T
-    T = R'*(-T);
-end
-
-function H = getHomography(X,x)
-    % X: World n x 3
-	% x: Image n x 4
-    X = X';
-    x = x';
-    sizeX = size(X);
-    
-    A = [];
-    for i = 1:sizeX(2)
-        A = [A; X(:,i).' 0 0 0 -X(:,i).'*x(1,i);
-            0 0 0 X(:,i).' -X(:,i).'*x(2,i)];
-    end
-    
-    [~, ~, V] = svd(A.'*A);
-    rawH = reshape(V(:,9),3,3)';
-    H = rawH/(rawH(3,3));
-end
-
 function pose = getPoseRow(R,T)
-    %TODO: how tf get quaternions????
-
     %Each quaternion, one per row, is of the form q = [w x y z]
     quat = rotm2quat(R);
     %pose = [PosX, PosY, PosZ, Quaternion, QuaternionX, QuaternionY, QuaternionZ]
-    pose = [transpose(T), quat]
+    pose = [transpose(T), quat];
 end
+
