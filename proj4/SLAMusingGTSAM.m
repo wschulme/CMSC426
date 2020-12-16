@@ -77,7 +77,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
             %I'm skipping locations we've already found to save time
             if ~isKey(locations,tag.TagID)
                 locations(tag.TagID) = getLocationObject(H, tag); 
-                disp(locations(tag.TagID).p1);
+                %disp(locations(tag.TagID).p1);
             end
         end
         
@@ -93,19 +93,17 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
 end
 
 function Detection = getDetection(det)
-Detection.TagID = det(1);
-Detection.p1 = [det(2), det(3)];
-Detection.p2 = [det(4), det(5)];
-Detection.p3 = [det(6), det(7)];
-Detection.p4 = [det(8), det(9)];
+    Detection.TagID = det(1);
+    Detection.p1 = [det(2), det(3)];
+    Detection.p2 = [det(4), det(5)];
+    Detection.p3 = [det(6), det(7)];
+    Detection.p4 = [det(8), det(9)];
 end
 
 function pose = getPoseRow(R,T)
     %Each quaternion, one per row, is of the form q = [w x y z]
     quat = rotm2quat(R);
     %pose = [PosX, PosY, PosZ, Quaternion, QuaternionX, QuaternionY, QuaternionZ]
-    disp(size(quat));
-    disp(size(T'));
     pose = [quat, transpose(T)];
 end
 
