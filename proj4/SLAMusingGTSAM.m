@@ -10,7 +10,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     LandMarksComputed  = [];
     AllPosesComputed = [];
     
-    %% DetAll Init
+    %% DetAllObj Init
     newDet = {};
     %This'll make debugging easier later TRUST ME
     for i=1:length(DetAll)
@@ -25,7 +25,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         end
     end
     
-    DetAll = newDet;
+    DetAllObj = newDet;
     fprintf('Tag10 Origin: (%f, %f) \n', Tag10.p1(1), Tag10.p1(2));
     
     %% Initialization
@@ -41,9 +41,9 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     poses = containers.Map('KeyType','int32','ValueType','any');
     
     %% Apply Homography to First Frame
-    NumDetections = size(DetAll{1});
+    NumDetections = size(DetAllObj{1});
     for i=1:NumDetections(2)
-        tag = DetAll{1}(i);
+        tag = DetAllObj{1}(i);
         locations(tag.TagID) = getLocationObject(H, tag); 
     end
     poses(1) = getPoseParts(H, K);
@@ -51,14 +51,14 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     AllPosesComputed = [AllPosesComputed; pose];
     LandMarksComputed = [LandMarksComputed; tag.TagID tag.p1 tag.p2 tag.p3 tag.p4];
         
-    for i=2:length(DetAll)
-        NumDetections = size(DetAll{i});
+    for i=2:length(DetAllObj)
+        NumDetections = size(DetAllObj{i});
         
         %% Gather World Locations
         imageCoords = [];
         worldCoords = [];
         for j=1:NumDetections(2)
-            tag = DetAll{i}(j);
+            tag = DetAllObj{i}(j);
             
             %If we've seen it, it's useful for calculating a homography
             if isKey(locations,tag.TagID)
@@ -73,7 +73,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         
         %% Apply New Homography and Store Locations
         for j=1:NumDetections(2)
-            tag = DetAll{i}(j);
+            tag = DetAllObj{i}(j);
             %I'm skipping locations we've already found to save time
             if ~isKey(locations,tag.TagID)
                 locations(tag.TagID) = getLocationObject(H, tag); 
@@ -122,9 +122,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     % Collect Landmark Points
     all_landmarks = cell(length(LandMarksComputed), 1);
-    disp(size(newDet));
     for i = length(newDet)
-        curr_landmarks = newDet{1,i};
+        % Tags
+        curr_landmarks = sortrows(DetAll{i},1);
+        % Init points + count
         points = cell(length(curr_landmarks), 1);
         count = 0;
         for k = 1:length(curr_landmarks(:,1))
@@ -134,6 +135,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
             end
         end
         all_landmarks{i} = points;
+        %disp(points);
     end
     
     graph = NonlinearFactorGraph;
@@ -144,9 +146,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     graph.add(PriorFactorPose2(x{1}, prior_mean, prior_noise));
     
     % Odometry
+    o = Pose2(2.0, 0.0, 0.0);
     o_noise = noiseModel.Diagonal.Sigmas([0.2; 0.2; 0.1]);
     for i = 1:length(x)-1 
-        graph.add(BetweenFactorPose2(x{i}, x{i+1}, eye(3), o_noise));
+        graph.add(BetweenFactorPose2(x{i}, x{i+1}, o, o_noise));
     end
     
     % Projection
