@@ -125,6 +125,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     for i = length(newDet)
         % Tags
         curr_landmarks = sortrows(DetAll{i},1);
+        disp(curr_landmarks);
         % Init points + count
         points = cell(length(curr_landmarks), 1);
         count = 0;
@@ -135,7 +136,6 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
             end
         end
         all_landmarks{i} = points;
-        %disp(points);
     end
     
     graph = NonlinearFactorGraph;
