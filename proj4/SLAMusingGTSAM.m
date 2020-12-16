@@ -115,13 +115,12 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     % (Page 18) https://smartech.gatech.edu/bitstream/handle/1853/45226/Factor%20Graphs%20and%20GTSAM%20A%20Hands-on%20Introduction%20GT-RIM-CP%26R-2012-002.pdf?sequence=1&isAllowed=y
     
     % Collect xs: 'x'
-    x = cell(length(newDet), 1);
-    for i = 1:length(newDet)
+    x = cell(length(DetAll), 1);
+    for i = 1:length(DetAll)
         x{i} = symbol('x', i);
     end
     
     % Collect Landmark Points: 'l'
-    % =========== TODO: THISSSSSSSSSSSS ==========
     all_landmarks = cell(length(LandMarksComputed), 1);
     for i = length(DetAll)
         % Tags
@@ -153,6 +152,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     % Projection
+    % =========== TODO: THISSSSSSSSSSSS ==========
     for i = 1:length(all_landmarks)
         for j = 1:length(all_landmarks{i})
             graph.add(Point2)
