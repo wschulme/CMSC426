@@ -88,6 +88,8 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         LandMarksComputed = [LandMarksComputed; tag.TagID tag.p1 tag.p2 tag.p3 tag.p4];
     end
     
+    %LandMarksComputed = sortrows(LandMarksComputed, 1);
+    
     %% Factor Graph/Plotting
     hold on;
     % Plot Pose (From the Side)
@@ -107,6 +109,52 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
        plot(xs, zs, 'r-', 'LineWidth', 1);
     end
     hold off;
+    
+    % Factor Graph (GTSAM)
+    % References: https://gtsam.org/tutorials/intro.html#magicparlabel-65377
+    % (Page 18) https://smartech.gatech.edu/bitstream/handle/1853/45226/Factor%20Graphs%20and%20GTSAM%20A%20Hands-on%20Introduction%20GT-RIM-CP%26R-2012-002.pdf?sequence=1&isAllowed=y
+    
+    % Collect xs
+    x = cell(length(newDet), 1);
+    for i = 1:length(newDet)
+        x{i} = symbol('x', i);
+    end
+    
+    % Collect Landmark Points
+    all_landmarks = cell(length(LandMarksComputed), 1);
+    disp(size(newDet));
+    for i = length(newDet)
+        curr_landmarks = newDet{1,i};
+        points = cell(length(curr_landmarks), 1);
+        count = 0;
+        for k = 1:length(curr_landmarks(:,1))
+            for j = 1:length(curr_landmarks(k, 2))
+                count = count + 1;
+                points{count} = symbol('lp', curr_landmarks(count, 1));
+            end
+        end
+        all_landmarks{i} = points;
+    end
+    
+    graph = NonlinearFactorGraph;
+    
+    % Prior
+    prior_mean = Pose2(0.0, 0.0, 0.0); % At origin
+    prior_noise = noiseModel.Diagonal.Sigmas([0.3; 0.3; 0.1]);
+    graph.add(PriorFactorPose2(x{1}, prior_mean, prior_noise));
+    
+    % Odometry
+    o_noise = noiseModel.Diagonal.Sigmas([0.2; 0.2; 0.1]);
+    for i = 1:length(x)-1 
+        graph.add(BetweenFactorPose2(x{i}, x{i+1}, eye(3), o_noise));
+    end
+    
+    % Projection
+    for i = 1:length(all_landmarks)
+        for j = 1:length(all_landmarks{i})
+            graph.add(Point2)
+        end
+    end
 end
 
 function Detection = getDetection(det)
