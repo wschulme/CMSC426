@@ -114,27 +114,29 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     % References: https://gtsam.org/tutorials/intro.html#magicparlabel-65377
     % (Page 18) https://smartech.gatech.edu/bitstream/handle/1853/45226/Factor%20Graphs%20and%20GTSAM%20A%20Hands-on%20Introduction%20GT-RIM-CP%26R-2012-002.pdf?sequence=1&isAllowed=y
     
-    % Collect xs
+    % Collect xs: 'x'
     x = cell(length(newDet), 1);
     for i = 1:length(newDet)
         x{i} = symbol('x', i);
     end
     
-    % Collect Landmark Points
+    % Collect Landmark Points: 'l'
+    % =========== TODO: THISSSSSSSSSSSS ==========
     all_landmarks = cell(length(LandMarksComputed), 1);
-    for i = length(newDet)
+    for i = length(DetAll)
         % Tags
         curr_landmarks = sortrows(DetAll{i},1);
-        disp(curr_landmarks);
-        % Init points + count
+        
         points = cell(length(curr_landmarks), 1);
         count = 0;
         for k = 1:length(curr_landmarks(:,1))
             for j = 1:length(curr_landmarks(k, 2))
                 count = count + 1;
+                disp(curr_landmarks(count, 1));
                 points{count} = symbol('l', curr_landmarks(count, 1));
             end
         end
+        disp(points);
         all_landmarks{i} = points;
     end
     
