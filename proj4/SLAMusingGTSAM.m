@@ -6,6 +6,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
 	% and the examples in the library in the GTSAM toolkit. See folder
 	% gtsam_toolbox/gtsam_examples
     
+    % Return vars Init
+    LandMarksComputed  = [];
+    AllPosesComputed = [];
+    
     %% DetAll Init
     newDet = {};
     %This'll make debugging easier later TRUST ME
@@ -43,7 +47,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         locations(tag.TagID) = getLocationObject(H, tag); 
     end
     poses(1) = getPoseParts(H, K);
-    
+    pose = getPoseRow(poses(1).R, poses(1).T);
+    AllPosesComputed = [AllPosesComputed; pose];
+    LandMarksComputed = [LandMarksComputed; tag.TagID tag.p1 tag.p2 tag.p3 tag.p4];
+        
     for i=2:length(DetAll)
         NumDetections = size(DetAll{i});
         
@@ -76,7 +83,13 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         
         %% Store Pose
         poses(i) = getPoseParts(H, K);
+        pose = getPoseRow(poses(i).R, poses(i).T);
+        AllPosesComputed = [AllPosesComputed; pose];
+        LandMarksComputed = [LandMarksComputed; tag.TagID tag.p1 tag.p2 tag.p3 tag.p4];
     end
+    
+    %% Factor Graph/Plotting
+    
 end
 
 function Detection = getDetection(det)
@@ -91,6 +104,8 @@ function pose = getPoseRow(R,T)
     %Each quaternion, one per row, is of the form q = [w x y z]
     quat = rotm2quat(R);
     %pose = [PosX, PosY, PosZ, Quaternion, QuaternionX, QuaternionY, QuaternionZ]
-    pose = [transpose(T), quat];
+    disp(size(quat));
+    disp(size(T'));
+    pose = [quat, transpose(T)];
 end
 
