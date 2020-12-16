@@ -89,7 +89,24 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     %% Factor Graph/Plotting
+    hold on;
+    % Plot Pose
+    for i = 1:size(AllPosesComputed, 1)
+        p = AllPosesComputed(i, :);
+        x = p(1);
+        z = p(3);
+        
+        plot(x, z, 'bo', 'LineWidth', 1);
+    end
     
+    % Plot Landmarks
+    for i = 1:size(LandMarksComputed, 1)
+       t = LandMarksComputed(i,:);
+       xs = [t(2) t(4) t(6) t(8) t(2)];
+       zs = [0 0 0 0 0];
+       plot(xs, zs, 'r-', 'LineWidth', 1);
+    end
+    hold off;
 end
 
 function Detection = getDetection(det)
