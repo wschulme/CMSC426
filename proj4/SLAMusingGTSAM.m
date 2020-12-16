@@ -130,7 +130,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         for k = 1:length(curr_landmarks(:,1))
             for j = 1:length(curr_landmarks(k, 2))
                 count = count + 1;
-                points{count} = symbol('lp', curr_landmarks(count, 1));
+                points{count} = symbol('l', curr_landmarks(count, 1));
             end
         end
         all_landmarks{i} = points;
