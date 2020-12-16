@@ -90,7 +90,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     %% Factor Graph/Plotting
     hold on;
-    % Plot Pose
+    % Plot Pose (From the Side)
     for i = 1:size(AllPosesComputed, 1)
         p = AllPosesComputed(i, :);
         x = p(1);
@@ -99,7 +99,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         plot(x, z, 'bo', 'LineWidth', 1);
     end
     
-    % Plot Landmarks
+    % Plot Landmarks (From the Side)
     for i = 1:size(LandMarksComputed, 1)
        t = LandMarksComputed(i,:);
        xs = [t(2) t(4) t(6) t(8) t(2)];
