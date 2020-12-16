@@ -90,7 +90,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     %LandMarksComputed = sortrows(LandMarksComputed, 1);
     
-    %% Factor Graph/Plotting
+    %% Plotting side view
     hold on;
     % Plot Pose (From the Side)
     for i = 1:size(AllPosesComputed, 1)
@@ -110,7 +110,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     hold off;
     
-    % Factor Graph (GTSAM)
+    %% Factor Graph (GTSAM)
     % References: https://gtsam.org/tutorials/intro.html#magicparlabel-65377
     % (Page 18) https://smartech.gatech.edu/bitstream/handle/1853/45226/Factor%20Graphs%20and%20GTSAM%20A%20Hands-on%20Introduction%20GT-RIM-CP%26R-2012-002.pdf?sequence=1&isAllowed=y
     
