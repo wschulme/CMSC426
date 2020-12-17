@@ -149,35 +149,51 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         graph.add(BetweenFactorPose2(x{i}, x{i+1}, o, o_noise));
     end
     
-    % Projection
-    % Add bearing/range measurement factors
-    degrees = pi/180;
-    brNoise = noiseModel.Diagonal.Sigmas([0.2; deg2rad(10)]);
-    for i = 1:length(LandMarksObserved)
-        for j = 1:length(LandMarksObserved(i))
-            LandMarkIdx = find(LandMarksObserved == curr_landmarks(i));
-            graph.add(BearingRangeFactor2D(x{i}, l{LandMarkIdx}, Rot2(45*degrees), 2, brNoise))
-        end
-    end
+    graph.print(sprintf('\nFactor graph:\n'));
     
-    graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
     
+    % Starting here, everything is temporary and testing. Disregard this
+    % code please. It's just me trying to figure out how to get the
+    % optimizer to run.
+    %% Initialize to noisy points
+    initialEstimate = Values;
+    initialEstimate.insert(1, Pose2(0.5, 0.0,  0.2 ));
+    initialEstimate.insert(2, Pose2(2.3, 0.1, -0.2 ));
+    initialEstimate.insert(3, Pose2(4.1, 0.1,  pi/2));
+    initialEstimate.insert(4, Pose2(4.0, 2.0,  pi  ));
+    initialEstimate.insert(5, Pose2(2.1, 2.1, -pi/2));
+    initialEstimate.print(sprintf('\nInitial estimate:\n'));
+
+    %% Optimize using Levenberg-Marquardt optimization with an ordering from colamd
+    optimizer = LevenbergMarquardtOptimizer(graph, initialEstimate);
+    result = optimizer.optimizeSafely();
+    result.print(sprintf('\nFinal result:\n'));
+
     %% Plot Covariance Ellipses
-%     figure,
-%     hold on
-% 
-%     for step = 1:NumSteps+1
-%         for count = 1:length(curr_landmarks(i))
-%             LandMarkIdx = find(LandMarksObserved == ObservedLandMarks{step}.Idx(count));
-%             plot([result.at(x{step}).x; result.at(l{LandMarkIdx}).x],...
-%                 [result.at(x{step}).y; result.at(l{LandMarkIdx}).y], 'c-');
+    cla;
+    hold on
+    plot([result.at(5).x;result.at(2).x],[result.at(5).y;result.at(2).y],'r-');
+    marginals = Marginals(graph, result);
+
+    plot2DTrajectory(result, [], marginals);
+    for i=1:5,marginals.marginalCovariance(i),end
+    axis equal
+    axis tight
+    view(2)
+    
+%     % Projection
+%     % Add bearing/range measurement factors
+%     degrees = pi/180;
+%     brNoise = noiseModel.Diagonal.Sigmas([0.2; deg2rad(10)]);
+%     for i = 1:length(LandMarksObserved)
+%         for j = 1:length(LandMarksObserved(i))
+%             LandMarkIdx = find(LandMarksObserved == curr_landmarks(i));
+%             graph.add(BearingRangeFactor2D(x{i}, l{LandMarkIdx}, Rot2(45*degrees), 2, brNoise))
 %         end
 %     end
-% 
-%     marginals = Marginals(graph, result);
-%     plot2DTrajectory(result, [], marginals);
-%     plot2DPoints(result, 'b', marginals);
-%     axis equal
+%     
+%     %graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
+%     
 end
 
 function Detection = getDetection(det)
