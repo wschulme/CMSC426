@@ -157,11 +157,9 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     % optimizer to run.
     %% Initialize to noisy points
     initialEstimate = Values;
-    initialEstimate.insert(1, Pose2(0.5, 0.0,  0.2 ));
-    initialEstimate.insert(2, Pose2(2.3, 0.1, -0.2 ));
-    initialEstimate.insert(3, Pose2(4.1, 0.1,  pi/2));
-    initialEstimate.insert(4, Pose2(4.0, 2.0,  pi  ));
-    initialEstimate.insert(5, Pose2(2.1, 2.1, -pi/2));
+    for i = 1:length(LandMarksObserved)
+        initialEstimate.insert(x{i}, Pose2(2.0, 0.0, 0.0));
+    end
     initialEstimate.print(sprintf('\nInitial estimate:\n'));
 
     %% Optimize using Levenberg-Marquardt optimization with an ordering from colamd
