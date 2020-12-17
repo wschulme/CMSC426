@@ -31,7 +31,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     %% Initialization
     %Calculate initial homography assuming a planar carpet of April Tags
     imageCoords = [Tag10.p1; Tag10.p2; Tag10.p3; Tag10.p4];
-    worldCoords = [[0,0,1];[TagSize,0,1];[0,TagSize,1];[TagSize,TagSize,1]];
+    worldCoords = [[0,0,1];[TagSize,0,1];[TagSize,TagSize,1];[0,TagSize,1]];
     
     H = getHomography(worldCoords, imageCoords);
     
@@ -39,12 +39,13 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     locations = containers.Map('KeyType','double','ValueType','any');
     % Map: frame -> Pose
     poses = containers.Map('KeyType','int32','ValueType','any');
+    tagIds = [];
     
     %% Apply Homography to First Frame
     NumDetections = size(DetAllObj{1});
     for i=1:NumDetections(2)
         tag = DetAllObj{1}(i);
-        locations(tag.TagID) = getLocationObject(H, tag); 
+        locations(tag.TagID) = getLocationObject(H, tag, 1); 
     end
     poses(1) = getPoseParts(H, K);
     pose = getPoseRow(poses(1).R, poses(1).T);
@@ -60,8 +61,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         for j=1:NumDetections(2)
             tag = DetAllObj{i}(j);
             
-            %If we've seen it, it's useful for calculating a homography
-            if isKey(locations,tag.TagID)
+            %If we've seen it, it's useful for calculating a homography if
+            %its from the previous frame
+            
+            if isKey(locations,tag.TagID) && locations(tag.TagID).frame == i-1
                 world = locations(tag.TagID);
                 imageCoords = [imageCoords; tag.p1; tag.p2; tag.p3; tag.p4];
                 worldCoords = [worldCoords; world.p1; world.p2; world.p3; world.p4];
@@ -74,11 +77,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         %% Apply New Homography and Store Locations
         for j=1:NumDetections(2)
             tag = DetAllObj{i}(j);
-            %I'm skipping locations we've already found to save time
-            if ~isKey(locations,tag.TagID)
-                locations(tag.TagID) = getLocationObject(H, tag); 
-                %disp(locations(tag.TagID).p1);
-            end
+            
+            locations(tag.TagID) = getLocationObject(H, tag, i); 
+            tagIds = [tagIds, tag.TagID];
+            
         end
         
         %% Store Pose
@@ -89,24 +91,18 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     %LandMarksComputed = sortrows(LandMarksComputed, 1);
-    
-    %% Plotting side view
+    %% 3D Plot from above
+    figure
     hold on;
-    % Plot Pose (From the Side)
-    for i = 1:size(AllPosesComputed, 1)
-        p = AllPosesComputed(i, :);
-        x = p(1);
-        z = p(3);
-        
-        plot(x, z, 'bo', 'LineWidth', 1);
-    end
     
-    % Plot Landmarks (From the Side)
-    for i = 1:size(LandMarksComputed, 1)
-       t = LandMarksComputed(i,:);
-       xs = [t(2) t(4) t(6) t(8) t(2)];
-       zs = [0 0 0 0 0];
-       plot(xs, zs, 'r-', 'LineWidth', 1);
+    tagIds = unique(tagIds);
+    for i = 1:length(tagIds)
+        l = locations(tagIds(i));
+        
+        plot3(l.p1(1),l.p1(2),0,'*','Color','y');
+        plot3(l.p2(1),l.p2(2),0,'*','Color','m');
+        plot3(l.p3(1),l.p3(2),0,'*','Color','b');
+        plot3(l.p4(1),l.p4(2),0,'*','Color','g');
     end
     hold off;
     
