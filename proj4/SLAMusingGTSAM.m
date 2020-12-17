@@ -113,6 +113,8 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     %% Factor Graph (GTSAM)
     % References: https://gtsam.org/tutorials/intro.html#magicparlabel-65377
     % (Page 18) https://smartech.gatech.edu/bitstream/handle/1853/45226/Factor%20Graphs%20and%20GTSAM%20A%20Hands-on%20Introduction%20GT-RIM-CP%26R-2012-002.pdf?sequence=1&isAllowed=y
+    % https://github.com/NitinJSanket/CMSC828THW1/blob/master/SLAMUsingGTSAM.m
+    % =========== TODO: THISSSSSSSSSSSS All of it except Prior and Odometry and x ==========
     
     % Collect xs: 'x'
     x = cell(length(DetAll), 1);
@@ -121,20 +123,16 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     % Collect Landmark Points: 'l'
-    all_landmarks = cell(length(LandMarksComputed), 1);
+    LandMarksObserved = [];
     for i = length(DetAll)
         % Tags
         curr_landmarks = sortrows(DetAll{i},1);
-        
-        points = cell(length(curr_landmarks), 1);
-        count = 0;
-        for k = 1:length(curr_landmarks(:,1))
-            for j = 1:length(curr_landmarks(k, 2))
-                count = count + 1;
-                points{count} = symbol('l', curr_landmarks(count, 1));
-            end
-        end
-        all_landmarks{i} = points;
+        LandMarksObserved = [LandMarksObserved, curr_landmarks(1)];
+    end
+    LandMarksObserved = unique(LandMarksObserved);
+    l = cell(length(LandMarksObserved),1);
+    for i = 1:length(LandMarksObserved)
+        l{i} = symbol('l', LandMarksObserved(i));
     end
     
     graph = NonlinearFactorGraph;
@@ -152,12 +150,17 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     % Projection
-    % =========== TODO: THISSSSSSSSSSSS ==========
-    for i = 1:length(all_landmarks)
-        for j = 1:length(all_landmarks{i})
-            graph.add(Point2)
+    % Add bearing/range measurement factors
+    degrees = pi/180;
+    brNoise = noiseModel.Diagonal.Sigmas([0.2; deg2rad(10)]);
+    for i = 1:length(LandMarksObserved)
+        for j = 1:length(LandMarksObserved(i))
+            LandMarkIdx = find(LandMarksObserved == curr_landmarks(1));
+            graph.add(BearingRangeFactor2D(x{i}, l{LandMarkIdx}, Rot2(45*degrees), 2, brNoise))
         end
     end
+    
+    graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
 end
 
 function Detection = getDetection(det)
