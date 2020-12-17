@@ -1,5 +1,5 @@
 function Pose = getPoseParts(K,H)
-    KH = inv(K)*H;
+    KH = K\H;
     temp = [KH(:,1) KH(:,2) cross(KH(:,1),KH(:,2))];
     [U,~,V] = svd(temp);
     R = U*[1 0 0; 0 1 0; 0 0 det(U*V.')]*V.';

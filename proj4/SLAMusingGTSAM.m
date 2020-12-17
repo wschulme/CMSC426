@@ -91,7 +91,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     %LandMarksComputed = sortrows(LandMarksComputed, 1);
-    %% 3D Plot from above
+    %% 3D Plot
     figure
     hold on;
     
@@ -104,6 +104,11 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         plot3(l.p3(1),l.p3(2),0,'*','Color','b');
         plot3(l.p4(1),l.p4(2),0,'*','Color','g');
     end
+    
+    for i=1:length(DetAllObj)
+        p = poses(i).T;
+        plot3(p(1),p(2),p(3), 'o', 'Color', 'r');
+    end 
     hold off;
     
     %% Factor Graph (GTSAM)
