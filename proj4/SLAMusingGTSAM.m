@@ -155,12 +155,29 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     brNoise = noiseModel.Diagonal.Sigmas([0.2; deg2rad(10)]);
     for i = 1:length(LandMarksObserved)
         for j = 1:length(LandMarksObserved(i))
-            LandMarkIdx = find(LandMarksObserved == curr_landmarks(1));
+            LandMarkIdx = find(LandMarksObserved == curr_landmarks(i));
             graph.add(BearingRangeFactor2D(x{i}, l{LandMarkIdx}, Rot2(45*degrees), 2, brNoise))
         end
     end
     
     graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
+    
+    %% Plot Covariance Ellipses
+%     figure,
+%     hold on
+% 
+%     for step = 1:NumSteps+1
+%         for count = 1:length(curr_landmarks(i))
+%             LandMarkIdx = find(LandMarksObserved == ObservedLandMarks{step}.Idx(count));
+%             plot([result.at(x{step}).x; result.at(l{LandMarkIdx}).x],...
+%                 [result.at(x{step}).y; result.at(l{LandMarkIdx}).y], 'c-');
+%         end
+%     end
+% 
+%     marginals = Marginals(graph, result);
+%     plot2DTrajectory(result, [], marginals);
+%     plot2DPoints(result, 'b', marginals);
+%     axis equal
 end
 
 function Detection = getDetection(det)
