@@ -47,7 +47,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         tag = DetAllObj{1}(i);
         locations(tag.TagID) = getLocationObject(H, tag, 1); 
     end
-    poses(1) = getPoseParts(H, K);
+    poses(1) = getPoseParts(K, H);
     pose = getPoseRow(poses(1).R, poses(1).T);
     AllPosesComputed = [AllPosesComputed; pose];
     LandMarksComputed = [LandMarksComputed; tag.TagID tag.p1 tag.p2 tag.p3 tag.p4];
@@ -84,7 +84,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         end
         
         %% Store Pose
-        poses(i) = getPoseParts(H, K);
+        poses(i) = getPoseParts(K, H);
         pose = getPoseRow(poses(i).R, poses(i).T);
         AllPosesComputed = [AllPosesComputed; pose];
         LandMarksComputed = [LandMarksComputed; tag.TagID tag.p1 tag.p2 tag.p3 tag.p4];
