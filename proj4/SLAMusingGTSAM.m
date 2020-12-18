@@ -1,6 +1,7 @@
 function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSize)
 	% For Input and Output specifications refer to the project pdf
 	import gtsam.*
+    import Levenberg.*
 	% Refer to Factor Graphs and GTSAM Introduction
 	% https://research.cc.gatech.edu/borg/sites/edu.borg/files/downloads/gtsam.pdf
 	% and the examples in the library in the GTSAM toolkit. See folder
@@ -136,18 +137,39 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     graph = NonlinearFactorGraph;
+
+    Rot3(poses(1).R)
+    Point3(poses(1).T)
     
     % Prior
-    prior_mean = Pose2(0.0, 0.0, 0.0); % At origin
-    prior_noise = noiseModel.Diagonal.Sigmas([0.3; 0.3; 0.1]);
-    graph.add(PriorFactorPose2(x{1}, prior_mean, prior_noise));
+    %prior_mean = Pose3(Rot3(H), Point3([pose(4:6)])); % At origin
+    prior_mean = Pose3(Rot3(poses(1).R), Point3(poses(1).T));
+    prior_noise = noiseModel.Diagonal.Sigmas(ones(6,1)*1e-2);
+    graph.add(PriorFactorPose3(x{1}, prior_mean, prior_noise));
     
     % Odometry
-    o = Pose2(2.0, 0.0, 0.0);
-    o_noise = noiseModel.Diagonal.Sigmas([0.2; 0.2; 0.1]);
+    o = Pose3(Rot3(poses(1).R), Point3(poses(1).T));
+    o_noise = noiseModel.Diagonal.Sigmas(ones(3,1)*1e-2);
     for i = 1:length(x)-1 
-        graph.add(BetweenFactorPose2(x{i}, x{i+1}, o, o_noise));
+        graph.add(BetweenFactorPose3(x{i}, x{i+1}, o, o_noise));
     end
+    
+    % Camera Calibration
+    cam = Cal3_S2(K(1, 1), K(2, 2), K(3, 3), K(1, 3), K(2, 3))
+    
+    % Optimizer
+    parameters = LevenbergMarquardtParams;
+    parameters.setLambdaInitial(1.0);
+    parameters.setVerbosityLM('trylambda');
+    
+    optimizer = LevenbergMarquardtOptimizer(graph, z, parameters);
+    
+    for i = 1:10
+        optimizer.iterate();
+    end
+    
+    result = optimizer.values();
+    result.print(sprintf('\nFinal result:\n  '));
     
     % Projection
     % Add bearing/range measurement factors
