@@ -90,7 +90,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
         LandMarksComputed = [LandMarksComputed; tag.TagID tag.p1 tag.p2 tag.p3 tag.p4];
     end
     
-    %LandMarksComputed = sortrows(LandMarksComputed, 1);
+    LandMarksComputed = sortrows(LandMarksComputed, 1);
     %% 3D Plot
     figure
     hold on;
@@ -125,16 +125,16 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     % Collect Landmark Points: 'l'
     LandMarksObserved = [];
-    for i = length(DetAll)
+    for i = 1:length(DetAll)
         % Tags
-        curr_landmarks = sortrows(DetAll{i},1);
-        LandMarksObserved = [LandMarksObserved, curr_landmarks(1)];
+        LandMarksObserved = [LandMarksObserved, LandMarksComputed(i,1)];
     end
     LandMarksObserved = unique(LandMarksObserved);
     l = cell(length(LandMarksObserved),1);
     for i = 1:length(LandMarksObserved)
         l{i} = symbol('l', LandMarksObserved(i));
     end
+    disp(size(LandMarksObserved));
     
     graph = NonlinearFactorGraph;
     
@@ -156,12 +156,12 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     brNoise = noiseModel.Diagonal.Sigmas([0.2; deg2rad(10)]);
     for i = 1:length(LandMarksObserved)
         for j = 1:length(LandMarksObserved(i))
-            LandMarkIdx = find(LandMarksObserved == curr_landmarks(1));
+            LandMarkIdx = find(LandMarksObserved == LandMarksComputed(j,1));
             graph.add(BearingRangeFactor2D(x{i}, l{LandMarkIdx}, Rot2(45*degrees), 2, brNoise))
         end
     end
     
-    graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
+    %graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
     
     %% Add factors for all measurements
     K1 = Cal3_S2(K(1, 1), K(2, 2), 0, K(1,3), K(2, 3));
