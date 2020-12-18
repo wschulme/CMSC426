@@ -138,8 +138,10 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     graph = NonlinearFactorGraph;
 
-    Rot3(poses(1).R)
-    Point3(poses(1).T)
+    disp(Rot3(poses(1).R));
+    disp(Point3(poses(1).T));
+    disp(poses(1).R);
+%     disp(['det of R' , det(Rot3(poses(1).R))]);
     
     % Prior
     %prior_mean = Pose3(Rot3(H), Point3([pose(4:6)])); % At origin
@@ -155,14 +157,34 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     % Camera Calibration
-    cam = Cal3_S2(K(1, 1), K(2, 2), K(3, 3), K(1, 3), K(2, 3))
+    cam = Cal3_S2(K(1, 1), K(2, 2), K(3, 3), K(1, 3), K(2, 3));
     
     % Optimizer
     parameters = LevenbergMarquardtParams;
-    parameters.setLambdaInitial(1.0);
+    parameters.setlambdaInitial(1.0);
     parameters.setVerbosityLM('trylambda');
     
-    optimizer = LevenbergMarquardtOptimizer(graph, z, parameters);
+    %% Add factors for all measurements
+    measurementNoiseSigma = 1.0;
+    baseNoiseModel = noiseModel.Isotropic.Sigma(2, measurementNoiseSigma);
+    for i=1:length(DetAll)
+        mat = DetAll{i};
+        for k=1:size(mat, 1)
+            dat = mat(k, :);
+            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(2), dat(3)), baseNoiseModel, x{i}, symbol('l',dat(1)), cam));
+            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(4), dat(5)), baseNoiseModel, x{i}, symbol('m',dat(1)), cam));
+            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(6), dat(7)), baseNoiseModel, x{i}, symbol('n',dat(1)), cam));
+            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(8), dat(9)), baseNoiseModel, x{i}, symbol('o',dat(1)), cam));
+        end
+    end
+    
+    initialEstimate = Values;
+    m = size(LandMarksComputed,1);
+    for i = 1:m
+        tagID = LandMarksComputed(i,1);
+        
+    end
+    optimizer = LevenbergMarquardtOptimizer(graph, initialEstimate, parameters);
     
     for i = 1:10
         optimizer.iterate();
@@ -183,23 +205,6 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     %graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
-    
-    %% Add factors for all measurements
-    measurementNoiseSigma = 1.0;
-    K1 = Cal3_S2(K(1, 1), K(2, 2), 0, K(1,3), K(2, 3));
-    baseNoiseModel = noiseModel.Isotropic.Sigma(2, measurementNoiseSigma);
-    for i=1:length(DetAll)
-        mat = DetAll{i};
-        for k=1:size(mat, 1)
-            dat = mat(k, :);
-            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(2), dat(3)), baseNoiseModel, x{i}, symbol('l',dat(1)), K1));
-            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(4), dat(5)), baseNoiseModel, x{i}, symbol('m',dat(1)), K1));
-            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(6), dat(7)), baseNoiseModel, x{i}, symbol('n',dat(1)), K1));
-            graph.add(GenericProjectionFactorCal3_S2(Point2(dat(8), dat(9)), baseNoiseModel, x{i}, symbol('o',dat(1)), K1));
-        end
-    end
-    
-    initialEstimate = Values;
     
 end
 
