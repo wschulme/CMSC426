@@ -134,7 +134,6 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     for i = 1:length(LandMarksObserved)
         l{i} = symbol('l', LandMarksObserved(i));
     end
-    disp(size(LandMarksObserved));
     
     graph = NonlinearFactorGraph;
     
