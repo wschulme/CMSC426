@@ -164,6 +164,18 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     parameters.setlambdaInitial(1.0);
     parameters.setVerbosityLM('trylambda');
     
+        % Add bearing/range measurement factors
+%     degrees = pi/180;
+%     brNoise = noiseModel.Diagonal.Sigmas([0.2; deg2rad(10)]);
+%     for i = 1:length(LandMarksObserved)
+%         for j = 1:length(LandMarksObserved(i))
+%             LandMarkIdx = find(LandMarksObserved == LandMarksComputed(j,1));
+%             graph.add(BearingRangeFactor2D(x{i}, l{LandMarkIdx}, Rot2(45*degrees), 2, brNoise))
+%         end
+%     end
+    
+    %graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
+    
     %% Add factors for all measurements
     measurementNoiseSigma = 1.0;
     baseNoiseModel = noiseModel.Isotropic.Sigma(2, measurementNoiseSigma);
@@ -179,11 +191,11 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     end
     
     initialEstimate = Values;
-    m = size(LandMarksComputed,1);
-    for i = 1:m
-        tagID = LandMarksComputed(i,1);
-        
+    initialEstimate.insert(x{1}, Pose3(Rot3(poses(1).R), Point3(poses(1).T)));
+    for i = 2:length(x)
+        initialEstimate.insert(x{i}, Pose3(Rot3(poses(i).R), Point3(poses(i).T)));
     end
+    
     optimizer = LevenbergMarquardtOptimizer(graph, initialEstimate, parameters);
     
     for i = 1:10
@@ -192,19 +204,6 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     
     result = optimizer.values();
     result.print(sprintf('\nFinal result:\n  '));
-    
-    % Projection
-    % Add bearing/range measurement factors
-    degrees = pi/180;
-    brNoise = noiseModel.Diagonal.Sigmas([0.2; deg2rad(10)]);
-    for i = 1:length(LandMarksObserved)
-        for j = 1:length(LandMarksObserved(i))
-            LandMarkIdx = find(LandMarksObserved == LandMarksComputed(j,1));
-            graph.add(BearingRangeFactor2D(x{i}, l{LandMarkIdx}, Rot2(45*degrees), 2, brNoise))
-        end
-    end
-    
-    %graph.print(sprintf('\nFull grObservedLandMarks{step}.Idxaph:\n'));
     
 end
 
